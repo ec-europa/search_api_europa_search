@@ -1,0 +1,15 @@
+{
+  "name":"ec-europa/search_api_europa_search",
+  "type":"drupal-module",
+  "description":"Provides an Europa Search backend for the Search API module.",
+  "prefer-stable": true,
+  "license":"EUPL-1.1",
+  "require": {
+    "ec-europa/oe-europa-search-client": "dev-master"
+  },
+  "require-dev": {
+    "ec-europa/oe-code-review": "^0.0.2",
+    "phpunit/phpunit": "^5",
+    "drush/drush": "~8.0"
+  }
+}

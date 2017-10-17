@@ -1,0 +1,9 @@
+name = Search API Europa Search
+description = "Offers an implementation of the Search API that uses Europa Search as backend."
+package = Search
+core = 7.x
+PHP = 5.4
+
+dependencies[] = search_api
+dependencies[] = registry_autoload
+registry_autoload[] = PSR-4

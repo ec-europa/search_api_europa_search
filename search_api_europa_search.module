@@ -1,0 +1,6 @@
+<?php
+
+/**
+ * @file
+ * Provides an Europa Search-based service class for the Search API.
+ */
