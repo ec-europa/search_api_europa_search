@@ -1,4 +1,7 @@
 # Search API Europa Search
+
+[![Build Status](https://travis-ci.org/ec-europa/search_api_europa_search.svg?branch=7.x-1.x)](https://travis-ci.org/ec-europa/search_api_europa_search)
+
 Search API Europa Search module provides a backend for the Search API which uses the "Europa Search" search engine for storing and searching data.
 
 ## Introduction
