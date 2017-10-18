@@ -43,7 +43,7 @@ In order to use this script, please read the next sub-sections.
 
 1. Clone the "[github](https://github.com/ec-europa/search_api_europa_search)" repository in the "DocumentRoot" repository of your server (www or htdocs);
 2. Go in the cloned repository;
-3. Execute this command: `env_scripts/setup-dev-env.sh`;
+3. Execute this command: `scripts/setup-dev-env.sh`;
 4. The environment is up and running with a fresh Drupal instance where the module is enabled.
 
 The admin user set in the Drupal instance is:
