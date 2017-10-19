@@ -58,10 +58,43 @@ TODO (NEPT-935)
 
 ## Configuration
 
-```
-TODO (NEPT-935)
-```
+In order to use Europa Search service through Search API, you must define a server and at least an index via 
+the Search API administration interface.
 
+This README will only focus on Europa Search specificity. For general explanation about the Search API, 
+please consult the [Search API documentation](https://www.drupal.org/docs/7/modules/search-api)
 
+### Search API Server
+
+Configuring a server pointing the Europa Search services, implies the following configuration in the 
+"Add server" form of the Search API admin interface:
+ 
+ 1. **Service class**: Select the "_Europa Search Service_";
+ 2. **Europa Search Service domain name**: Type the URL root (domain name) where the ES services are hosted; I.E. 
+ the URL part common to all Europa search services;
+ 3. **Europa Search Service url port** (optional): the port number define to access the Europa search services;
+ 4. **Ingestion services settings (Indexing requests) > Registered API key**: The API key to use with the indexing requests.<br /> 
+    It is communicated by the Europa Search team;
+ 5. **Ingestion services settings (Indexing requests) > Registered database**: The database id to use with the indexing requests.<br /> 
+    It is communicated by the Europa Search team;
+ 6. **Search API services settings (Search requests) > Registered API key**: The API key to use with the search requests.<br /> 
+    It is communicated by the Europa Search team.<br />
+    Note that the value can be the same as the indexing one.
+ 7. **Search API services settings (Search requests) > Include the database value in search queries**: Indicates if the database id 
+ set previously must be used in the search queries sent to the services.
+
+ ### Search API index
+ 
+ The definition of the Search API index is detailed in the [Search API official documentation](https://www.drupal.org/docs/7/modules/search-api/getting-started/howto-add-an-index).
+ 
+ #### Mandatory configurations:
+ 
+ In order that the Search API interacts correctly with the Europa Search services, some data alterations **must** be add to the Search API index,
+ see filters tab of the index definition interface:
+ * URL field;
+ * Complete entity view; 
+ * Europa Search reference.
+ 
+ It adds data required by the Europa Search services in order to index correctly entities.
 
 

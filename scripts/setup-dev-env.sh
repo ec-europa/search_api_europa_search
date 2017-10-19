@@ -17,8 +17,9 @@ mkdir -p $ROOTDIR/web/sites/all/modules/search_api_europa_search
 ln -s $ROOTDIR/search_api_europa_search.info $MODULESDIR/search_api_europa_search/search_api_europa_search.info
 ln -s $ROOTDIR/search_api_europa_search.module $MODULESDIR/search_api_europa_search/search_api_europa_search.module
 ln -s $ROOTDIR/phpunit.xml.dist $MODULESDIR/search_api_europa_search/phpunit.xml.dist
-# ln -s src $MODULESDIR/search_api_europa_search/src
+ln -s $ROOTDIR/src $MODULESDIR/search_api_europa_search/src
 # ln -s tests $MODULESDIR/search_api_europa_search/tests
-ln -s vendor $MODULESDIR/search_api_europa_search/vendor
+ln -s $ROOTDIR/vendor $MODULESDIR/search_api_europa_search/vendor
 cd web
 ../vendor/bin/drush en -y search_api_europa_search
+../vendor/bin/drush dis -y overlay

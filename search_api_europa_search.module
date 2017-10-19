@@ -4,3 +4,44 @@
  * @file
  * Provides an Europa Search-based service class for the Search API.
  */
+
+/**
+ * Implements hook_search_api_service_info().
+ *
+ * It declares the new Europa Search service for Search API.
+ */
+function search_api_europa_search_search_api_service_info() {
+  $services['europa_search_service'] = array(
+    'name' => t('Europa Search Service'),
+    'description' => t('Service for Europa search engine.'),
+    'class' => 'SearchApiEuropaSearchService',
+  );
+
+  return $services;
+}
+
+/**
+ * Implements hook_search_api_data_type_info().
+ */
+function search_api_europa_search_search_api_data_type_info() {
+  return array(
+    'web_content' => array(
+      'name' => t('Web content'),
+      'fallback' => 'text',
+    ),
+  );
+}
+
+/**
+ * Implements hook_search_api_alter_callback_info().
+ */
+function search_api_europa_search_search_api_alter_callback_info() {
+
+  $callbacks['search_api_europa_search_alter_reference'] = array(
+    'name' => t('Europa Search reference'),
+    'description' => t("Adds a specific reference (id) to the indexed data."),
+    'class' => 'SearchApiEuropaSearchAlterAddReference',
+  );
+
+  return $callbacks;
+}
