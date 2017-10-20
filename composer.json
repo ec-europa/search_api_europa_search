@@ -2,7 +2,6 @@
   "name":"ec-europa/search_api_europa_search",
   "type":"drupal-module",
   "description":"Provides an Europa Search backend for the Search API module.",
-
   "minimum-stability": "dev",
   "prefer-stable": true,
   "license":"EUPL-1.1",
@@ -16,7 +15,10 @@
     "drupal/drupal": "~7.0",
     "drush/drush": "~8.0",
     "webflo/drupal-finder": "^1.0.0",
-    "webmozart/path-util": "^2.3"
+    "webmozart/path-util": "^2.3",
+    "cweagans/composer-patches": "^1.6",
+    "drupal-composer/preserve-paths": "^0.1",
+    "drupal/composer_autoloader": "^1.0"
   },
   "repositories": [
     {
@@ -32,6 +34,14 @@
       "web/sites/all/libraries/{$name}/": ["type:drupal-library"],
       "web/sites/all/modules/contrib/{$name}/": ["type:drupal-module"],
       "web/sites/all/themes/contrib/{$name}/": ["type:drupal-theme"]
-    }
+    },
+      "preserve-paths": [
+          "web/sites/all/libraries",
+          "web/sites/all/modules/custom",
+          "web/sites/all/modules/features",
+          "web/sites/all/themes/custom",
+          "web/sites/all/translations",
+          "web/sites/default"
+      ]
   }
 }
