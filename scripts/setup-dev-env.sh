@@ -39,7 +39,7 @@ FILE="$ROOTDIR/scripts/build.properties.dist"
 
 if [ -f "$FILE" ]
 then
-  echo "$FILE found., lading dist. parameters."
+  echo "$FILE found; loading parameters."
 
   while IFS='=' read -r key value
   do
