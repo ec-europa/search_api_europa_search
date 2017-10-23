@@ -14,6 +14,8 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
 
   protected $searchClient;
 
+  protected $ESClientFactory;
+
   /**
    * {@inheritdoc}
    */
@@ -28,7 +30,13 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
    * {@inheritdoc}
    */
   public function indexItems(SearchApiIndex $index, array $items) {
+    initEuropaSearchClient();
     // TODO: Implement indexItems() method.
+    $returned_keys = array();
+    foreach ($items as $id => $item) {
+      watchdog('GILLES item ' . $id, print_r($item, TRUE));
+      $returned_keys[] = $id;
+    }
   }
 
   /**
@@ -49,6 +57,20 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
    * {@inheritdoc}
    */
   public function configurationForm(array $form, array &$form_state) {
+    // Default value.
+    $this->options += array(
+      'url_root' => '',
+      'url_port' => '',
+      'ingestion_settings' => array(
+        'ingestion_api_key' => '',
+        'ingestion_database' => '',
+      ),
+      'search_settings' => array(
+        'search_api_key' => '',
+        'activate_database_filter' => FALSE,
+      ),
+    );
+
     $form['url_root'] = array(
       '#type' => 'textfield',
       '#title' => t('Europa Search Service domain name'),
@@ -120,6 +142,23 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
   }
 
   /**
+   * Initialize the EuropaSearch factory object.
+   */
+  protected function initEuropaSearchClient() {
+    $fullRoot = $this->options['url_root'];
+    if (!empty($this->options['url_port'])) {
+      $fullRoot .= ':' . $this->options['url_port'];
+    }
+    $wsSettings = array(
+      'URLRoot' => $fullRoot,
+      'APIKey' => $this->options['ingestion_settings']['ingestion_api_key'],
+      'database' => $this->options['ingestion_settings']['ingestion_database'],
+    );
+    $settings = new EuropaSearchConfig($wsSettings);
+    $this->ESClientFactory = new EuropaSearch($settings);
+  }
+
+  /**
    * Set the HTTP client object to send indexing requests.
    *
    * @param string $entityType
@@ -129,25 +168,14 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
    *   Raised if the entity type is not supported by the
    *   "ec-europa/oe-europa-search-client" library yet.
    */
-  protected function setIndexingClient($entityType = 'node') {
-    $fullRoot = $this->options['url_root'];
-    if (!empty($this->options['url_port'])) {
-      $fullRoot .= ':' . $this->options['url_port'];
-    }
-    $wsSettings = array(
-      'URLRoot' => $fullRoot,
-      'APIKey' => $this->options['ingestion_settings']['ingestion_api_key'],
-      'APIKey' => $this->options['ingestion_settings']['ingestion_database'],
-    );
-    $settings = new EuropaSearchConfig($wsSettings);
-    $factory = new EuropaSearch($settings);
+  protected function getIndexingClient($entityType = 'node') {
 
     $webContentType = array(
       'node',
       'taxonomy',
     );
     if (in_array($entityType, $webContentType)) {
-      $this->indexingClient = $factory->getIndexingWebContentClient();
+      $this->indexingClient = $this->ESClientFactory->getIndexingWebContentClient();
     }
 
     throw new \Exception('The entity type is not supported by the Europa Search Search API module yet.');

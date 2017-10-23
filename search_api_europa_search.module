@@ -36,8 +36,7 @@ function search_api_europa_search_search_api_data_type_info() {
  * Implements hook_search_api_alter_callback_info().
  */
 function search_api_europa_search_search_api_alter_callback_info() {
-
-  $callbacks['search_api_europa_search_alter_reference'] = array(
+  $callbacks['search_api_europa_search_alter_add_reference'] = array(
     'name' => t('Europa Search reference'),
     'description' => t("Adds a specific reference (id) to the indexed data."),
     'class' => 'SearchApiEuropaSearchAlterAddReference',
