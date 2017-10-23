@@ -43,12 +43,21 @@ In order to use this script, please read the next sub-sections.
 
 1. Clone the "[github](https://github.com/ec-europa/search_api_europa_search)" repository in the "DocumentRoot" repository of your server (www or htdocs);
 2. Go in the cloned repository;
-3. Execute this command: `scripts/setup-dev-env.sh`;
-4. The environment is up and running with a fresh Drupal instance where the module is enabled.
+3. Create a "scripts/build.properties.local" file where you set parameters specific to your environment.<br />
+The available parameters are listed in the "scripts/build.properties.dist" file. You have just to set those that are specific to environment.<br />
+Below, the list of available parameters with their use:
+   * **USER_MAIL**: The e-mail of the admin user to define in the Drupal instance of your environment;
+   * **USER_NAME**: The user name of the admin user to define in the Drupal instance of your environment;
+   * **USER_PASSWORD**: The user password of the admin user to define in the Drupal instance of your environment;
+   * **DB_TYPE**: The database type used in your environment and will be used in the DB url definition (I.E. mysql);
+   * **DB_URL**: The database URL used in your environment and will be used in the DB url definition;
+   * **DB_PORT**: (Optional) The database URL used in your environment and will be used in the DB url definition;
+   * **DB_USER**: The database user name used in your environment and will be used in the DB url definition;
+   * **DB_PASS**: (Optional) The database user password used in your environment and will be used in the DB url definition;
+   * **DB_INSTANCE*: The database name used in your environment and will be used in the DB url definition;
+4. Execute this command: `scripts/setup-dev-env.sh`;
+5. The environment is up and running with a fresh Drupal instance where the module is enabled.
 
-The admin user set in the Drupal instance is:
-* User name: _admin_
-* User password: _admin_
 
 ### For site builder
 
