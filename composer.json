@@ -1,10 +1,10 @@
 {
-  "name":"ec-europa/search_api_europa_search",
-  "type":"drupal-module",
-  "description":"Provides an Europa Search backend for the Search API module.",
+  "name": "ec-europa/search_api_europa_search",
+  "type": "drupal-module",
+  "description": "Provides an Europa Search backend for the Search API module.",
   "minimum-stability": "dev",
   "prefer-stable": true,
-  "license":"EUPL-1.1",
+  "license": "EUPL-1.1",
   "require": {
     "ec-europa/oe-europa-search-client": "dev-nept-1558-issue17"
   },
