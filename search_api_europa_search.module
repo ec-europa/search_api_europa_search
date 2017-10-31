@@ -21,18 +21,6 @@ function search_api_europa_search_search_api_service_info() {
 }
 
 /**
- * Implements hook_search_api_data_type_info().
- */
-function search_api_europa_search_search_api_data_type_info() {
-  return array(
-    'web_content' => array(
-      'name' => t('Web content'),
-      'fallback' => 'text',
-    ),
-  );
-}
-
-/**
  * Implements hook_search_api_alter_callback_info().
  */
 function search_api_europa_search_search_api_alter_callback_info() {

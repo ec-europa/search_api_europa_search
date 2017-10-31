@@ -1,7 +1,8 @@
 <?php
 
 use EC\EuropaSearch\EuropaSearch;
-use EC\EuropaSearch\EuropaSearchConfig;
+use Psr\Log\LogLevel;
+use EC\EuropaSearch\Exceptions\ValidationException;
 
 /**
  * Class SearchApiEuropaSearchService.
@@ -9,10 +10,6 @@ use EC\EuropaSearch\EuropaSearchConfig;
  * Defines the Europa Search service for Search API.
  */
 class SearchApiEuropaSearchService extends SearchApiAbstractService {
-
-  protected $indexingClient;
-
-  protected $searchClient;
 
   protected $ESClientFactory;
 
@@ -30,27 +27,57 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
    * {@inheritdoc}
    */
   public function indexItems(SearchApiIndex $index, array $items) {
-    initEuropaSearchClient();
-    // TODO: Implement indexItems() method.
+    $this->initEuropaSearchClient();
+
     $returned_keys = array();
     foreach ($items as $id => $item) {
-      watchdog('GILLES item ' . $id, print_r($item, TRUE));
-      $returned_keys[] = $id;
+      try {
+        $indexSender = new SearchApiEuropaSearchIndexSender($item, $this->options['ingestion_settings']['fallback_language']);
+        $reference = $indexSender->sendMessage($this->ESClientFactory);
+        watchdog('Search API Europa Search', 'reference received from the ES services: @ref.', array('@ref' => print_r($reference, TRUE)), WATCHDOG_INFO);
+        $returned_keys[] = $id;
+      }
+      catch (ValidationException $ve) {
+        $message = 'The submitted index item is invalid! The following validation errors has been detected: @errors';
+        watchdog_exception('Search API Europa Search', $ve, $message, array('@errors' => print_r($ve->getValidationErrors(), TRUE)));
+      }
+      catch (\Exception $e) {
+        watchdog_exception('Search API Europa Search', $e, $e->getMessage());
+      }
     }
+
+    return $returned_keys;
   }
 
   /**
    * {@inheritdoc}
    */
   public function deleteItems($ids = 'all', SearchApiIndex $index = NULL) {
-    // TODO: Implement deleteItems() method.
+    // TODO: Implement deleteItems() method after the ticket SEARCH-2346.
   }
 
   /**
    * {@inheritdoc}
    */
   public function search(SearchApiQueryInterface $query) {
-    // TODO: Implement search() method.
+    $this->initEuropaSearchClient();
+
+    try {
+      $searchSender = new SearchApiEuropaSearchSearchSender($query);
+      $response = $searchSender->sendMessage($this->ESClientFactory);
+      $responseParser = new SearchApiEuropaSearchSearchResponseParser($query);
+
+      return $responseParser->parseSearch($response);
+    }
+    catch (ValidationException $ve) {
+      $message = 'The submitted index item is invalid! The following validation errors has been detected: @errors';
+      watchdog_exception('Search API Europa Search', $ve, $message, array('@errors' => print_r($ve->getValidationErrors(), TRUE)));
+    }
+    catch (\Exception $e) {
+      watchdog_exception('Search API Europa Search', $e, $e->getMessage());
+    }
+
+    return array('result count' => 0);
   }
 
   /**
@@ -59,34 +86,41 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
   public function configurationForm(array $form, array &$form_state) {
     // Default value.
     $this->options += array(
-      'url_root' => '',
-      'url_port' => '',
-      'ingestion_settings' => array(
-        'ingestion_api_key' => '',
-        'ingestion_database' => '',
-      ),
-      'search_settings' => array(
-        'search_api_key' => '',
-        'activate_database_filter' => FALSE,
-      ),
+      'ingestion_settings' => array(),
+      'search_settings' => array(),
     );
 
-    $form['url_root'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Europa Search Service domain name'),
-      '#description' => t('URL root (without the last slash) where the the Europa Search REST services to use are host; ex.: https://search.ec.europa.eu.'),
-      '#required' => TRUE,
-      '#default_value' => $this->options['url_root'],
+    $this->options['ingestion_settings'] += array(
+      'ingestion_url_root' => '',
+      'ingestion_url_port' => '',
+      'ingestion_api_key' => '',
+      'ingestion_database' => '',
+      'fallback_language' => language_default('language'),
     );
-    $form['url_port'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Europa Search Service url port'),
-      '#description' => t('Port number to use with the URL of the Europa Search REST services.'),
-      '#default_value' => $this->options['url_port'],
+
+    $this->options['search_settings'] += array(
+      'search_url_root' => '',
+      'search_url_port' => '',
+      'search_api_key' => '',
+      'activate_database_filter' => FALSE,
     );
+
     $form['ingestion_settings'] = array(
       '#type' => 'fieldset',
       '#title' => t('Ingestion services settings (Indexing requests)'),
+    );
+    $form['ingestion_settings']['ingestion_url_root'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Europa Search Service URL'),
+      '#description' => t('URL root (without the last slash) pointing to the the Europa Search Indexing services (Ingestion API).'),
+      '#required' => TRUE,
+      '#default_value' => $this->options['ingestion_settings']['ingestion_url_root'],
+    );
+    $form['ingestion_settings']['ingestion_url_port'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Europa Search Service url port'),
+      '#description' => t('Port number to use with the URL of the Europa REST services.'),
+      '#default_value' => $this->options['ingestion_settings']['ingestion_url_port'],
     );
     $form['ingestion_settings']['ingestion_api_key'] = array(
       '#type' => 'textfield',
@@ -94,6 +128,13 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
       '#description' => t('The Europa Search API key to use with any indexing requests.'),
       '#required' => TRUE,
       '#default_value' => $this->options['ingestion_settings']['ingestion_api_key'],
+    );
+    $form['ingestion_settings']['fallback_language'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Fallback language in case of Neutral language contentEuropa Search Service url port'),
+      '#description' => t('The Europa Search REST services does not support "und" language. 
+        A fallback language is to be set here for any entity to send for indexing.'),
+      '#default_value' => $this->options['ingestion_settings']['fallback_language'],
     );
     $form['ingestion_settings']['ingestion_database'] = array(
       '#type' => 'textfield',
@@ -105,6 +146,19 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
     $form['search_settings'] = array(
       '#type' => 'fieldset',
       '#title' => t('Search API services settings (Search requests)'),
+    );
+    $form['search_settings']['search_url_root'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Europa Search Service URL'),
+      '#description' => t('URL root (without the last slash) pointing to the the Europa Search REST services (Search API).'),
+      '#required' => TRUE,
+      '#default_value' => $this->options['search_settings']['search_url_root'],
+    );
+    $form['search_settings']['search_url_port'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Europa Search Service url port'),
+      '#description' => t('Port number to use with the URL of the Europa REST services.'),
+      '#default_value' => $this->options['search_settings']['search_url_port'],
     );
     $form['search_settings']['search_api_key'] = array(
       '#type' => 'textfield',
@@ -128,57 +182,95 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
    */
   public function configurationFormValidate(array $form, array &$values, array &$form_state) {
     // Checks the Services URL root validity.
-    $url_root = $values['url_root'];
-    if (!valid_url($url_root, TRUE) || ('/' == substr($url_root, -1))) {
-      form_error($form['url_root'], t('The @title is not a valid url', array('@title' => $form['url_root']['#title'])));
+    $url_root = $values['ingestion_settings']['ingestion_url_root'];
+    if (!$this->validateConfiguredUrl($url_root)) {
+      $form_item = $form['ingestion_settings']['ingestion_url_root'];
+      form_error($form_item, t('The @title is not a valid url', array('@title' => $form_item['#title'])));
     }
 
     // Checks the Services URL port validity.
-    $url_port = $values['url_port'];
-    if (!empty($url_port) && (!is_numeric($url_port) || $url_port < 0 || $url_port > 65535)) {
-      $message_parameter = array('@title' => $form['url_port']['#title']);
-      form_error($form['url_port'], t('The @title is not a valid port. It should be a numeric value between 0 and 65535', $message_parameter));
+    $url_port = $values['ingestion_settings']['ingestion_url_port'];
+    if (!$this->validateConfiguredPort($url_port)) {
+      $form_item = $form['ingestion_settings']['ingestion_url_port'];
+      $message_parameter = array('@title' => $form_item['#title']);
+      form_error($form_item, t('The @title is not a valid port. It should be a numeric value between 0 and 65535', $message_parameter));
+    }
+    // Checks the Search Services URL root validity.
+    $url_root = $values['search_settings']['search_url_root'];
+    if (!$this->validateConfiguredUrl($url_root)) {
+      $form_item = $form['search_settings']['search_url_root'];
+      form_error($form_item, t('The @title is not a valid url', array('@title' => $form_item['#title'])));
+    }
+
+    // Checks the Search Services URL port validity.
+    $url_port = $values['search_settings']['search_url_port'];
+    if (!$this->validateConfiguredPort($url_port)) {
+      $form_item = $form['search_settings']['search_url_port'];
+      $message_parameter = array('@title' => $form_item['#title']);
+      form_error($form_item, t('The @title is not a valid port. It should be a numeric value between 0 and 65535', $message_parameter));
     }
   }
 
   /**
-   * Initialize the EuropaSearch factory object.
+   * Validates an URL set in the configuration form.
+   *
+   * @param string $url
+   *   The URL to validate.
+   *
+   * @return bool
+   *   TRUE if valid.
+   */
+  protected function validateConfiguredUrl($url) {
+    return (valid_url($url, TRUE) && ('/' != substr($url, -1)));
+  }
+
+  /**
+   * Validates a port set in the configuration form.
+   *
+   * @param string $port
+   *   The port to validate.
+   *
+   * @return bool
+   *   TRUE if valid.
+   */
+  protected function validateConfiguredPort($port) {
+    return (empty($port) || (is_numeric($port) && ($port >= 0 && $port <= 65535)));
+  }
+
+  /**
+   * Initializes the EuropaSearch factory object.
    */
   protected function initEuropaSearchClient() {
-    $fullRoot = $this->options['url_root'];
-    if (!empty($this->options['url_port'])) {
-      $fullRoot .= ':' . $this->options['url_port'];
+    $option = $this->options['ingestion_settings'];
+    $fullRoot = $option['ingestion_url_root'];
+    if (!empty($option['ingestion_url_port'])) {
+      $fullRoot .= ':' . $option['ingestion_url_port'];
     }
-    $wsSettings = array(
-      'URLRoot' => $fullRoot,
-      'APIKey' => $this->options['ingestion_settings']['ingestion_api_key'],
-      'database' => $this->options['ingestion_settings']['ingestion_database'],
+    $indexingSettings = array(
+      'url_root' => $fullRoot,
+      'api_key' => $option['ingestion_api_key'],
+      'database' => $option['ingestion_database'],
     );
-    $settings = new EuropaSearchConfig($wsSettings);
-    $this->ESClientFactory = new EuropaSearch($settings);
-  }
 
-  /**
-   * Set the HTTP client object to send indexing requests.
-   *
-   * @param string $entityType
-   *   The type of the entity that must be sent for indexing.
-   *
-   * @throws Exception
-   *   Raised if the entity type is not supported by the
-   *   "ec-europa/oe-europa-search-client" library yet.
-   */
-  protected function getIndexingClient($entityType = 'node') {
-
-    $webContentType = array(
-      'node',
-      'taxonomy',
-    );
-    if (in_array($entityType, $webContentType)) {
-      $this->indexingClient = $this->ESClientFactory->getIndexingWebContentClient();
+    $option = $this->options['search_settings'];
+    $fullRoot = $option['search_url_root'];
+    if (!empty($option['search_url_port'])) {
+      $fullRoot .= ':' . $option['search_url_port'];
     }
+    $searchSettings = array(
+      'url_root' => $fullRoot,
+      'api_key' => $option['search_api_key'],
+    );
+    $clientConfiguration = [
+      'indexing_settings' => $indexingSettings,
+      'search_settings' => $searchSettings,
+      'services_settings' => [
+        'logger' => new Psr3DrupalLog('Search API Europa Search'),
+        'log_level' => LogLevel::DEBUG,
+      ],
+    ];
 
-    throw new \Exception('The entity type is not supported by the Europa Search Search API module yet.');
+    $this->ESClientFactory = new EuropaSearch($clientConfiguration);
   }
 
 }
