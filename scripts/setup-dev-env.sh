@@ -66,10 +66,10 @@ fi
 echo
 
 # BUILD Database parameter value.
-DB_FULL_URL="${DB_TYPE}://${DB_USER}:${DB_PASS}@${DB_URL}/${DB_INSTANCE}"
+DB_FULL_URL="${DB_TYPE}://${DB_USER}:${DB_PASS}@${DB_URL}/${DB_NAME}"
 if [ ! -z "$DB_PORT" ];
 then
-  DB_FULL_URL="${DB_TYPE}://${DB_USER}:${DB_PASS}@${DB_URL}:${DB_PORT}/${DB_INSTANCE}"
+  DB_FULL_URL="${DB_TYPE}://${DB_USER}:${DB_PASS}@${DB_URL}:${DB_PORT}/${DB_NAME}"
 fi
 
 echo "Parameters used for the environment installation:"
@@ -79,7 +79,7 @@ echo "DB_URL      = " $DB_URL
 echo "DB_PORT     = " $DB_PORT
 echo "DB_USER     = " $DB_USER
 echo "DB_PASS     = " $DB_PASS
-echo "DB_NAME     = " $DB_INSTANCE
+echo "DB_NAME     = " $DB_NAME
 echo "DB_FULL_URL = " $DB_FULL_URL
 echo
 
