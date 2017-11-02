@@ -1,6 +1,5 @@
 <?php
 
-use EC\EuropaSearch\Messages\Components\DocumentMetadata\BooleanMetadata;
 use EC\EuropaSearch\Messages\Components\DocumentMetadata\DateMetadata;
 
 /**
@@ -71,7 +70,6 @@ class SearchApiEuropaSearchMetadataBuilder {
     if (!isset($methodMapping[$fieldType])) {
       throw new \Exception(t('Unknown type "@dataType" for the "@dataName" field.', array('@dataName' => $fieldName, '@dataType' => $fieldType)));
     }
-
     $className = $methodMapping[$fieldType];
     $this->metadataObject = new $className($fieldName);
 
@@ -99,19 +97,13 @@ class SearchApiEuropaSearchMetadataBuilder {
    *   Array of metadata values to set.
    */
   protected function setMetadataValues(array $metadataValues) {
-    switch (TRUE) {
-      case ($this->metadataObject instanceof BooleanMetadata):
-        $this->metadataObject->setRawValues($metadataValues);
-        break;
+    if ($this->metadataObject instanceof DateMetadata) {
+      $this->metadataObject->setTimestampValues($metadataValues);
 
-      case ($this->metadataObject instanceof DateMetadata):
-        $this->metadataObject->setTimestampValues($metadataValues);
-        break;
-
-      default:
-        $this->metadataObject->setValues($metadataValues);
-        break;
+      return;
     }
+
+    $this->metadataObject->setRawValues($metadataValues);
   }
 
 }

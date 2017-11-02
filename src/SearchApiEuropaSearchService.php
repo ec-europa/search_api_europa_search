@@ -9,7 +9,7 @@ use EC\EuropaSearch\Exceptions\ValidationException;
  *
  * Defines the Europa Search service for Search API.
  */
-class SearchApiEuropaSearchService extends SearchApiAbstractService {
+class SearchApiEuropaSearchService extends \SearchApiAbstractService {
 
   protected $ESClientFactory;
 
@@ -109,6 +109,7 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
       '#type' => 'fieldset',
       '#title' => t('Ingestion services settings (Indexing requests)'),
     );
+
     $form['ingestion_settings']['ingestion_url_root'] = array(
       '#type' => 'textfield',
       '#title' => t('Europa Search Service URL'),
@@ -116,12 +117,7 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
       '#required' => TRUE,
       '#default_value' => $this->options['ingestion_settings']['ingestion_url_root'],
     );
-    $form['ingestion_settings']['ingestion_url_port'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Europa Search Service url port'),
-      '#description' => t('Port number to use with the URL of the Europa REST services.'),
-      '#default_value' => $this->options['ingestion_settings']['ingestion_url_port'],
-    );
+
     $form['ingestion_settings']['ingestion_api_key'] = array(
       '#type' => 'textfield',
       '#title' => t('Registered API key'),
@@ -129,6 +125,7 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
       '#required' => TRUE,
       '#default_value' => $this->options['ingestion_settings']['ingestion_api_key'],
     );
+
     $form['ingestion_settings']['fallback_language'] = array(
       '#type' => 'textfield',
       '#title' => t('Fallback language in case of Neutral language contentEuropa Search Service url port'),
@@ -136,6 +133,7 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
         A fallback language is to be set here for any entity to send for indexing.'),
       '#default_value' => $this->options['ingestion_settings']['fallback_language'],
     );
+
     $form['ingestion_settings']['ingestion_database'] = array(
       '#type' => 'textfield',
       '#title' => t('Registered database'),
@@ -143,6 +141,7 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
       '#required' => TRUE,
       '#default_value' => $this->options['ingestion_settings']['ingestion_database'],
     );
+
     $form['search_settings'] = array(
       '#type' => 'fieldset',
       '#title' => t('Search API services settings (Search requests)'),
@@ -154,12 +153,7 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
       '#required' => TRUE,
       '#default_value' => $this->options['search_settings']['search_url_root'],
     );
-    $form['search_settings']['search_url_port'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Europa Search Service url port'),
-      '#description' => t('Port number to use with the URL of the Europa REST services.'),
-      '#default_value' => $this->options['search_settings']['search_url_port'],
-    );
+
     $form['search_settings']['search_api_key'] = array(
       '#type' => 'textfield',
       '#title' => t('Registered API key'),
@@ -188,26 +182,11 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
       form_error($form_item, t('The @title is not a valid url', array('@title' => $form_item['#title'])));
     }
 
-    // Checks the Services URL port validity.
-    $url_port = $values['ingestion_settings']['ingestion_url_port'];
-    if (!$this->validateConfiguredPort($url_port)) {
-      $form_item = $form['ingestion_settings']['ingestion_url_port'];
-      $message_parameter = array('@title' => $form_item['#title']);
-      form_error($form_item, t('The @title is not a valid port. It should be a numeric value between 0 and 65535', $message_parameter));
-    }
     // Checks the Search Services URL root validity.
     $url_root = $values['search_settings']['search_url_root'];
     if (!$this->validateConfiguredUrl($url_root)) {
       $form_item = $form['search_settings']['search_url_root'];
       form_error($form_item, t('The @title is not a valid url', array('@title' => $form_item['#title'])));
-    }
-
-    // Checks the Search Services URL port validity.
-    $url_port = $values['search_settings']['search_url_port'];
-    if (!$this->validateConfiguredPort($url_port)) {
-      $form_item = $form['search_settings']['search_url_port'];
-      $message_parameter = array('@title' => $form_item['#title']);
-      form_error($form_item, t('The @title is not a valid port. It should be a numeric value between 0 and 65535', $message_parameter));
     }
   }
 
@@ -225,27 +204,11 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
   }
 
   /**
-   * Validates a port set in the configuration form.
-   *
-   * @param string $port
-   *   The port to validate.
-   *
-   * @return bool
-   *   TRUE if valid.
-   */
-  protected function validateConfiguredPort($port) {
-    return (empty($port) || (is_numeric($port) && ($port >= 0 && $port <= 65535)));
-  }
-
-  /**
    * Initializes the EuropaSearch factory object.
    */
   protected function initEuropaSearchClient() {
     $option = $this->options['ingestion_settings'];
     $fullRoot = $option['ingestion_url_root'];
-    if (!empty($option['ingestion_url_port'])) {
-      $fullRoot .= ':' . $option['ingestion_url_port'];
-    }
     $indexingSettings = array(
       'url_root' => $fullRoot,
       'api_key' => $option['ingestion_api_key'],
@@ -254,9 +217,6 @@ class SearchApiEuropaSearchService extends SearchApiAbstractService {
 
     $option = $this->options['search_settings'];
     $fullRoot = $option['search_url_root'];
-    if (!empty($option['search_url_port'])) {
-      $fullRoot .= ':' . $option['search_url_port'];
-    }
     $searchSettings = array(
       'url_root' => $fullRoot,
       'api_key' => $option['search_api_key'],

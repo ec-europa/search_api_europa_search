@@ -76,24 +76,64 @@ class SearchApiEuropaSearchSearchSender {
 
     // Build the query itself, full text search does not belong to the query
     // (see buildFullTextSearchCriteria()).
-    $this->buildEuropaSearchQuery($this->searchApiQuery->getFilter(), $indexedFieldsData);
+    $this->buildEuropaSearchQuery($this->searchApiQuery, $indexedFieldsData);
   }
 
   /**
-   * Build the full text search criteria.
+   * Builds the full text search criteria.
    *
-   * @param array $searchApiKeys
-   *   The keys defined in the Search API query.
+   * @param array|string $searchApiKeys
+   *   The key(s) defined in the Search API query.
    * @param string $parse_mode
    *   The parse mode defined in the Search API query.
    *
    * @return string
    *   The full text criteria to use in the service request.
    */
-  private function buildFullTextSearchCriteria(array $searchApiKeys, $parse_mode = '') {
-    $conjunction = (isset($searchApiKeys['#conjunction']) && ('AND' == $searchApiKeys['#conjunction'])) ? '+' : '';
+  private function buildFullTextSearchCriteria($searchApiKeys, $parse_mode = '') {
+    if (is_array($searchApiKeys)) {
+      return $this->buildFulltextSearchOnArray($searchApiKeys, $parse_mode);
+    }
+
+    if ('direct' === $parse_mode) {
+      return check_plain($searchApiKeys);
+    }
+
     $negation = !empty($searchApiKeys['#negation']);
+
+    return (TRUE === $negation ? '- ' : '') . $searchApiKeys;
+  }
+
+  /**
+   * Build the full text search criteria based on multiple keys.
+   *
+   * @param array $searchApiKeys
+   *   The key(s) defined in the Search API query.
+   * @param string $parse_mode
+   *   The parse mode defined in the Search API query.
+   *
+   * @return string
+   *   The full text criteria to use in the service request.
+   */
+  private function buildFulltextSearchOnArray(array $searchApiKeys, $parse_mode = '') {
+    $conjunction = '';
+    if (isset($searchApiKeys['#conjunction']) && ('AND' == $searchApiKeys['#conjunction'])) {
+      $conjunction = '+';
+    }
+
+    $negation = !empty($searchApiKeys['#negation']);
+
     $values = array();
+    foreach ($searchApiKeys as $key => $value) {
+      if ((!element_child($key)) || empty($value)) {
+        continue;
+      }
+      $values[] = $this->buildFullTextSearchCriteria($value);
+    }
+
+    if (!empty($values)) {
+      return (TRUE === $negation ? '- ' : '') . implode(" {$conjunction} ", $values);
+    }
 
     return '';
   }
@@ -107,7 +147,7 @@ class SearchApiEuropaSearchSearchSender {
    *   The fields that are indexed in Search API.
    */
   protected function buildEuropaSearchQuery(SearchApiQueryInterface $searchApiQuery, array $indexedFields) {
-    $filters = $searchApiQuery->getFilters();
+    $filters = $searchApiQuery->getFilter();
     foreach ($filters as $key => $searchApiFilter) {
       // TODO finalize implementation.
     }
