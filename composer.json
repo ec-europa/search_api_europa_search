@@ -2,7 +2,7 @@
   "name": "ec-europa/search_api_europa_search",
   "type": "drupal-module",
   "description": "Provides an Europa Search backend for the Search API module.",
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
   "prefer-stable": true,
   "license": "EUPL-1.1",
   "require": {
