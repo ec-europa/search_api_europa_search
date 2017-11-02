@@ -221,14 +221,14 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
       'url_root' => $fullRoot,
       'api_key' => $option['search_api_key'],
     );
-    $clientConfiguration = [
+    $clientConfiguration = array(
       'indexing_settings' => $indexingSettings,
       'search_settings' => $searchSettings,
-      'services_settings' => [
+      'services_settings' => array(
         'logger' => new Psr3DrupalLog('Search API Europa Search'),
         'log_level' => LogLevel::DEBUG,
-      ],
-    ];
+      ),
+    );
 
     $this->ESClientFactory = new EuropaSearch($clientConfiguration);
   }
