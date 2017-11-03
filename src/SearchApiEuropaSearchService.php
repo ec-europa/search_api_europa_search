@@ -67,7 +67,9 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
       $response = $searchSender->sendMessage($this->ESClientFactory);
       $responseParser = new SearchApiEuropaSearchSearchResponseParser($query);
 
-      return $responseParser->parseSearch($response);
+      $searchResults = $responseParser->parseSearch($response);
+
+      return $searchResults;
     }
     catch (ValidationException $ve) {
       $message = 'The submitted index item is invalid! The following validation errors has been detected: @errors';

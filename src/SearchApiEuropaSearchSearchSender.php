@@ -62,14 +62,16 @@ class SearchApiEuropaSearchSearchSender {
 
     // Builds the full text criteria of the query.
     $text = $this->buildFullTextSearchCriteria($this->searchApiQuery->getKeys(), $searchOptions);
-    $this->searchMessage->setSearchedText($text);
+    $this->searchMessage->setSearchedText(check_plain($text));
 
     // The pagination starts to 1 for Europa Search services.
     $offset = 1;
-    if (!empty($searchOptions['offset']) && ('0' != $searchOptions['offset'])) {
-      $offset = ((int) $searchOptions['offset']) + 1;
+    $limit = intval($searchOptions['limit']);
+    if (isset($searchOptions['offset']) && ('0' != $searchOptions['offset'])) {
+      $offset = (intval($searchOptions['offset'])) + 1;
+      $limit += 1;
     }
-    $this->searchMessage->setPagination((int) $searchOptions['limit'], $offset);
+    $this->searchMessage->setPagination($limit, $offset);
 
     // Build the sort criteria for the query.
     $this->buildEuropaSearchSortCriteria($sortDefinitions, $indexedFieldsData);
@@ -147,10 +149,9 @@ class SearchApiEuropaSearchSearchSender {
    *   The fields that are indexed in Search API.
    */
   protected function buildEuropaSearchQuery(SearchApiQueryInterface $searchApiQuery, array $indexedFields) {
-    $filters = $searchApiQuery->getFilter();
-    foreach ($filters as $key => $searchApiFilter) {
-      // TODO finalize implementation.
-    }
+    $builder = new SearchApiEuropaSearchQueryBuilder($searchApiQuery, $indexedFields);
+    $query = $builder->getQuery();
+    $this->searchMessage->setQuery($query);
   }
 
   /**

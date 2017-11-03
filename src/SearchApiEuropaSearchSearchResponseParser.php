@@ -52,6 +52,7 @@ class SearchApiEuropaSearchSearchResponseParser {
         'id' => $entityId,
         'score' => $result->getSortingWeight(),
         'fields' => $fields,
+        'excerpt' => $result->getResultSummary(),
       );
     }
 
@@ -73,9 +74,21 @@ class SearchApiEuropaSearchSearchResponseParser {
     if (empty($resultMetadata)) {
       return $fields;
     }
+    $indexedField = $this->searchApiQuery->getIndex()->getFields();
 
-    foreach ($resultMetadata as $key => $data) {
-      // TODO: Implement the mapping mechanic.
+    foreach ($indexedField as $fieldName => $fieldInfo) {
+      $comparableName = str_replace(':', '_', $fieldName);
+      $comparableName = strtoupper($comparableName);
+
+      if (isset($resultMetadata[$comparableName])) {
+        $fieldValue = reset($resultMetadata[$comparableName]);
+        if ('date' == $fieldInfo['type']) {
+          $fieldValue = date("U", strtotime($fieldValue));
+        }
+        $fields[$fieldName] = array(
+          '#value' => $fieldValue,
+        );
+      }
     }
 
     return $fields;
