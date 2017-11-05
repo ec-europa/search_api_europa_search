@@ -13,7 +13,7 @@ class SearchApiEuropaSearchSearchResponseParser {
   /**
    * The Search API index related to the Search related responses objects.
    *
-   * @var SearchApiIndex
+   * @var SearchApiQueryInterface
    */
   private $searchApiQuery;
 
@@ -77,21 +77,77 @@ class SearchApiEuropaSearchSearchResponseParser {
     $indexedField = $this->searchApiQuery->getIndex()->getFields();
 
     foreach ($indexedField as $fieldName => $fieldInfo) {
+      $dataType = search_api_extract_inner_type($fieldInfo['type']);
+      $typeInfo = search_api_get_data_type_info($dataType);
+
       $comparableName = str_replace(':', '_', $fieldName);
       $comparableName = strtoupper($comparableName);
 
       if (isset($resultMetadata[$comparableName])) {
-        $fieldValue = reset($resultMetadata[$comparableName]);
-        if ('date' == $fieldInfo['type']) {
-          $fieldValue = date("U", strtotime($fieldValue));
+        $fieldValue = $resultMetadata[$comparableName];
+        if ('date' == $dataType) {
+          $fieldValue = $this->formatIsoDate($fieldValue);
         }
+
         $fields[$fieldName] = array(
           '#value' => $fieldValue,
         );
+
+        if (('string' == $typeInfo['fallback']) && $this->isTextFormatProcessorActive()) {
+          // Deactivation of the value sanitation in favor of
+          // the "search_api_europa_search_processor" process.
+          $fields[$fieldName]['#sanitize_callback'] = FALSE;
+        }
       }
     }
 
     return $fields;
+  }
+
+  /**
+   * Formats ISO date into timestamp.
+   *
+   * @param array|string $fieldValue
+   *   The date value to format.
+   *
+   * @return array|string
+   *   The formatted value.
+   */
+  protected function formatIsoDate($fieldValue) {
+    if (empty($fieldValue)) {
+      return $fieldValue;
+    }
+
+    if (is_array($fieldValue)) {
+      $formattedValues = array();
+      foreach ($fieldValue as $rawValue) {
+        $formattedValues[] = date("U", strtotime($rawValue));
+      }
+
+      return $formattedValues;
+    }
+
+    return date("U", strtotime($fieldValue));
+  }
+
+  /**
+   * Checks if the text format processor is enabled.
+   *
+   * @return bool
+   *   True if the "search_api_europa_search_processor" is enable and
+   *   "result_text_format" is no equals to '_none'.
+   */
+  protected function isTextFormatProcessorActive() {
+    $processors = $this->searchApiQuery->getOption('processors');
+    $processor = $processors['search_api_europa_search_processor'];
+
+    if (!$processor['status'] || !module_exists('filter')) {
+      return FALSE;
+    }
+
+    $processorSettings = $processor['settings'];
+
+    return (!empty($processorSettings['result_text_format'])) && ('_none' != $processorSettings['result_text_format']);
   }
 
 }

@@ -61,9 +61,21 @@ Below, the list of available parameters with their use:
 
 ### For site builder
 
-```
-TODO (NEPT-935)
-```
+#### Requirements
+
+ * Drupal 7.x
+ * Search API 1.x
+ * Any solution allowing calling the composer autoload class like [Composer autoloader](https://www.drupal.org/project/composer_autoloader).
+ * Configuration parameters supplied by the Europa Search team.
+ 
+#### Installation
+ 
+Install as you would normally install a contributed Drupal module. See:
+https://drupal.org/documentation/install/modules-themes/modules-7 for further
+information.
+
+Navigate to administer >> modules. Enable "Search API Europa Search".
+
 
 ## Configuration
 
@@ -105,5 +117,16 @@ Configuring a server pointing the Europa Search services, implies the following 
  * Europa Search reference.
  
  It adds data required by the Europa Search services in order to index correctly entities.
+ 
+ ### Recommended configurations:
+ 
+ It is recommended to enable "**Europa Search results processing**" processor in the index. This Search API processor allows:
+ - Setting the highlighting parameters to use with each search request:
+   - Which HTML tags to use in the text highlighting mechanism ("**Highlighting prefix**" & "**Highlighting suffix**" processor parameters);
+   - The maximum number of characters that must be highlighted in a result text ("**Highlight limit**" processor parameter).
+ - Setting which text format to apply on "text" fields (string, fulltext search, uri...) ("**Text format on result text fields**" processor parameter).
+ 
+ Without this processor, the Europa Search service will use their default parameters for highlighting texts, and the "check plain" format will be apply
+ on all text fields.
 
 

@@ -30,10 +30,11 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
     $this->initEuropaSearchClient();
 
     $returned_keys = array();
+    $indexSender = new SearchApiEuropaSearchIndexSender($this->ESClientFactory, $this->options['ingestion_settings']['fallback_language']);
+
     foreach ($items as $id => $item) {
       try {
-        $indexSender = new SearchApiEuropaSearchIndexSender($item, $this->options['ingestion_settings']['fallback_language']);
-        $reference = $indexSender->sendMessage($this->ESClientFactory);
+        $reference = $indexSender->sendMessage($item);
         watchdog('Search API Europa Search', 'reference received from the ES services: @ref.', array('@ref' => print_r($reference, TRUE)), WATCHDOG_INFO);
         $returned_keys[] = $id;
       }
@@ -63,16 +64,16 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
     $this->initEuropaSearchClient();
 
     try {
-      $searchSender = new SearchApiEuropaSearchSearchSender($query);
-      $response = $searchSender->sendMessage($this->ESClientFactory);
-      $responseParser = new SearchApiEuropaSearchSearchResponseParser($query);
+      $searchSender = new SearchApiEuropaSearchSearchSender($this->ESClientFactory);
+      $response = $searchSender->sendMessage($query);
 
+      $responseParser = new SearchApiEuropaSearchSearchResponseParser($query);
       $searchResults = $responseParser->parseSearch($response);
 
       return $searchResults;
     }
     catch (ValidationException $ve) {
-      $message = 'The submitted index item is invalid! The following validation errors has been detected: @errors';
+      $message = 'The submitted search query is invalid! The following validation errors has been detected: @errors';
       watchdog_exception('Search API Europa Search', $ve, $message, array('@errors' => print_r($ve->getValidationErrors(), TRUE)));
     }
     catch (\Exception $e) {
@@ -163,6 +164,7 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
       '#required' => TRUE,
       '#default_value' => $this->options['search_settings']['search_api_key'],
     );
+
     $form['search_settings']['activate_database_filter'] = array(
       '#type' => 'checkbox',
       '#title' => t('Include the database value in search queries'),
@@ -180,16 +182,21 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
     // Checks the Services URL root validity.
     $url_root = $values['ingestion_settings']['ingestion_url_root'];
     if (!$this->validateConfiguredUrl($url_root)) {
-      $form_item = $form['ingestion_settings']['ingestion_url_root'];
-      form_error($form_item, t('The @title is not a valid url', array('@title' => $form_item['#title'])));
+      $formItem = $form['ingestion_settings']['ingestion_url_root'];
+      form_error($formItem, t('The @title is not a valid url', array('@title' => $formItem['#title'])));
     }
 
     // Checks the Search Services URL root validity.
     $url_root = $values['search_settings']['search_url_root'];
     if (!$this->validateConfiguredUrl($url_root)) {
-      $form_item = $form['search_settings']['search_url_root'];
-      form_error($form_item, t('The @title is not a valid url', array('@title' => $form_item['#title'])));
+      $formItem = $form['search_settings']['search_url_root'];
+      form_error($formItem, t('The @title is not a valid url', array('@title' => $formItem['#title'])));
     }
+
+    // Secure other saved values: check_plain.
+    $values['ingestion_settings']['ingestion_api_key'] = check_plain($values['ingestion_settings']['ingestion_api_key']);
+    $values['ingestion_settings']['ingestion_database'] = check_plain($values['ingestion_settings']['ingestion_database']);
+    $values['search_settings']['search_api_key'] = check_plain($values['search_settings']['search_api_key']);
   }
 
   /**

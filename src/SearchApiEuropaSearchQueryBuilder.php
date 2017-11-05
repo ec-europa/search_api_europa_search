@@ -86,7 +86,7 @@ class SearchApiEuropaSearchQueryBuilder {
   }
 
   /**
-   * Build a Europa search filter clause and add it to the query or the filter.
+   * Builds a Europa search filter clause & adds it to the query or the filter.
    *
    * @param array $searchApiClause
    *   The filter clause coming from Search API.

@@ -32,3 +32,19 @@ function search_api_europa_search_search_api_alter_callback_info() {
 
   return $callbacks;
 }
+
+/**
+ * Implements hook_search_api_processor_info().
+ */
+function search_api_europa_search_search_api_processor_info() {
+  $processors['search_api_europa_search_processor'] = array(
+    'name' => t('Europa Search results processing'),
+    'description' => t('Configure the highlighting that Europa Search services must apply results,
+    and the text format to apply on the text fields returned with results.<br/> 
+    <strong>Do not use it with the "Highlighting" and "HTML filter" processors!</strong>'),
+    'class' => 'SearchApiEuropaSearchProcessor',
+    'weight' => 40,
+  );
+
+  return $processors;
+}

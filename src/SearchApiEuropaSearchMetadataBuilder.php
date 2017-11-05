@@ -30,11 +30,9 @@ class SearchApiEuropaSearchMetadataBuilder {
    *   Raised if the entity data type is not supported by the message class.
    */
   public function __construct($fieldName = '', $fieldType = 'string', array $metadataValues = array()) {
-
     if (!empty($fieldName)) {
       $this->convertField($fieldName, $fieldType, $metadataValues);
     }
-
   }
 
   /**
@@ -70,6 +68,7 @@ class SearchApiEuropaSearchMetadataBuilder {
     if (!isset($methodMapping[$fieldType])) {
       throw new \Exception(t('Unknown type "@dataType" for the "@dataName" field.', array('@dataName' => $fieldName, '@dataType' => $fieldType)));
     }
+
     $className = $methodMapping[$fieldType];
     $this->metadataObject = new $className($fieldName);
 

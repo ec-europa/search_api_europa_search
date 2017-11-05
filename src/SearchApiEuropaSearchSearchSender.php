@@ -22,46 +22,48 @@ class SearchApiEuropaSearchSearchSender {
    *
    * @var SearchApiQueryInterface
    */
-  protected $searchApiQuery;
+  protected $clientFactory;
 
   /**
    * SearchApiEuropaSearchSearchSender constructor.
    *
-   * @param SearchApiQueryInterface $query
-   *   The Search API query object.
+   * @param \EC\EuropaSearch\EuropaSearch $clientFactory
+   *   The client factory used for the message sending.
    */
-  public function __construct(SearchApiQueryInterface $query) {
+  public function __construct(EuropaSearch $clientFactory) {
     $this->searchMessage = new SearchMessage();
-    $this->searchApiQuery = $query;
-
-    $this->buildMessageObject();
+    $this->clientFactory = $clientFactory;
   }
 
   /**
    * Sends the built message to the Europa Search services.
    *
-   * @param \EC\EuropaSearch\EuropaSearch $clientFactory
-   *   The client factory used for the message sending.
+   * @param SearchApiQueryInterface $query
+   *   The Search API query object.
    *
    * @return string
    *   The reference of the indexing element returned by the
    *   Europa Search service.
    */
-  public function sendMessage(EuropaSearch $clientFactory) {
-    return $clientFactory->getSearchApplication()->sendMessage($this->searchMessage);
+  public function sendMessage(SearchApiQueryInterface $query) {
+    $this->buildMessageObject($query);
+    return $this->clientFactory->getSearchApplication()->sendMessage($this->searchMessage);
   }
 
   /**
    * Builds the SearchMessage object.
+   *
+   * @param SearchApiQueryInterface $query
+   *   The Search API query object.
    */
-  public function buildMessageObject() {
-    $searchOptions = $this->searchApiQuery->getOptions();
-    $searchApiIndex = $this->searchApiQuery->getIndex();
-    $sortDefinitions = $this->searchApiQuery->getSort();
+  public function buildMessageObject(SearchApiQueryInterface $query) {
+    $searchOptions = $query->getOptions();
+    $searchApiIndex = $query->getIndex();
+    $sortDefinitions = $query->getSort();
     $indexedFieldsData = $searchApiIndex->getFields();
 
     // Builds the full text criteria of the query.
-    $text = $this->buildFullTextSearchCriteria($this->searchApiQuery->getKeys(), $searchOptions);
+    $text = $this->buildFullTextSearchCriteria($query->getKeys(), $searchOptions);
     $this->searchMessage->setSearchedText(check_plain($text));
 
     // The pagination starts to 1 for Europa Search services.
@@ -76,9 +78,15 @@ class SearchApiEuropaSearchSearchSender {
     // Build the sort criteria for the query.
     $this->buildEuropaSearchSortCriteria($sortDefinitions, $indexedFieldsData);
 
+    // Build the highlighting settings.
+    $highLightSettings = $this->getHighlightingSettings($searchOptions['processors']);
+    if ($highLightSettings) {
+      $this->searchMessage->setHighLightParameters($highLightSettings['highlight_regex'], $highLightSettings['highlight_limit']);
+    }
+
     // Build the query itself, full text search does not belong to the query
     // (see buildFullTextSearchCriteria()).
-    $this->buildEuropaSearchQuery($this->searchApiQuery, $indexedFieldsData);
+    $this->buildEuropaSearchQuery($query, $indexedFieldsData);
   }
 
   /**
@@ -165,12 +173,42 @@ class SearchApiEuropaSearchSearchSender {
   protected function buildEuropaSearchSortCriteria(array $sortDefinitions, array $indexedFields) {
     $sortFields = array_keys($sortDefinitions);
     $sortField = reset($sortFields);
+
     if (('search_api_relevance' != $sortField) && (isset($indexedFields[$sortField]))) {
       $fieldDefinition = $indexedFields[$sortField];
       $metadataBuilder = new SearchApiEuropaSearchMetadataBuilder($sortField, $fieldDefinition['type']);
       $sortDirection = $sortDefinitions[$sortField];
       $this->searchMessage->setSortCriteria($metadataBuilder->getMetadataObject(), $sortDirection);
     }
+  }
+
+  /**
+   * Gets the search message highlighting settings.
+   *
+   * @param array $processors
+   *   The processors defined in the Search API index.
+   *
+   * @return array|bool
+   *   Array of 2 items:
+   *   - 'highlight_regex': The regex value used by Europa Search services to
+   *     highlight text.
+   *   - 'highlight_limit': The length of the highlighted text.
+   *   It returns FALSE if no settings are defined in the concerned index.
+   */
+  protected function getHighlightingSettings(array $processors) {
+    $processor = $processors['search_api_europa_search_processor'];
+
+    if (!$processor['status']) {
+      return FALSE;
+    }
+
+    $processorSettings = $processor['settings'];
+    $regex = $processorSettings['highlight_prefix'] . '{}' . $processorSettings['highlight_suffix'];
+
+    return array(
+      'highlight_regex' => $regex,
+      'highlight_limit' => $processorSettings['highlight_limit'],
+    );
   }
 
 }
