@@ -90,6 +90,11 @@ class SearchApiEuropaSearchProcessor extends SearchApiAbstractProcessor {
             '@title2' => $suffixFormItem['#title'],
           )));
     }
+
+    // Secure the text values.
+    $values['highlight_prefix'] = filter_xss_admin($values['highlight_prefix']);
+    $values['highlight_suffix'] = filter_xss_admin($values['highlight_suffix']);
+    $values['highlight_limit'] = check_plain($values['highlight_limit']);
   }
 
   /**
