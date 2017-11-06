@@ -99,6 +99,28 @@ class SearchApiEuropaSearchProcessor extends SearchApiAbstractProcessor {
 
   /**
    * {@inheritdoc}
+   *
+   * It injects the Europa Search Highlighting settings into the query options.
+   */
+  public function preprocessSearchQuery(SearchApiQuery $query) {
+    parent::preprocessSearchQuery($query);
+
+    $regex = $this->options['highlight_prefix'] . '{}' . $this->options['highlight_suffix'];
+
+    $settings = array(
+      'highlight_regex' => $regex,
+      'highlight_limit' => intval($this->options['highlight_limit']),
+    );
+    $query->setOption('europa_search_highlight_settings', $settings);
+
+    $isTextFormatEnabled = ('_none' != $this->options['result_text_format']);
+    $query->setOption('europa_search_text_format_enabled', $isTextFormatEnabled);
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * It applies the text format on text fields.
    */
   public function postprocessSearchResults(array &$response, SearchApiQuery $query) {
 
@@ -111,7 +133,7 @@ class SearchApiEuropaSearchProcessor extends SearchApiAbstractProcessor {
       return;
     }
 
-    $indexedField = $this->searchApiQuery->getIndex()->getFields();
+    $indexedField = $query->getIndex()->getFields();
     foreach ($response['results'] as $id => &$result) {
       foreach ($result['fields'] as $fieldName => &$field) {
         if (!isset($indexedField[$fieldName])) {

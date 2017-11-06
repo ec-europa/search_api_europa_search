@@ -79,8 +79,8 @@ class SearchApiEuropaSearchSearchSender {
     $this->buildEuropaSearchSortCriteria($sortDefinitions, $indexedFieldsData);
 
     // Build the highlighting settings.
-    $highLightSettings = $this->getHighlightingSettings($searchOptions['processors']);
-    if ($highLightSettings) {
+    if (!empty($searchOptions['europa_search_highlight_settings'])) {
+      $highLightSettings = $searchOptions['europa_search_highlight_settings'];
       $this->searchMessage->setHighLightParameters($highLightSettings['highlight_regex'], $highLightSettings['highlight_limit']);
     }
 
@@ -180,35 +180,6 @@ class SearchApiEuropaSearchSearchSender {
       $sortDirection = $sortDefinitions[$sortField];
       $this->searchMessage->setSortCriteria($metadataBuilder->getMetadataObject(), $sortDirection);
     }
-  }
-
-  /**
-   * Gets the search message highlighting settings.
-   *
-   * @param array $processors
-   *   The processors defined in the Search API index.
-   *
-   * @return array|bool
-   *   Array of 2 items:
-   *   - 'highlight_regex': The regex value used by Europa Search services to
-   *     highlight text.
-   *   - 'highlight_limit': The length of the highlighted text.
-   *   It returns FALSE if no settings are defined in the concerned index.
-   */
-  protected function getHighlightingSettings(array $processors) {
-    $processor = $processors['search_api_europa_search_processor'];
-
-    if (!$processor['status']) {
-      return FALSE;
-    }
-
-    $processorSettings = $processor['settings'];
-    $regex = $processorSettings['highlight_prefix'] . '{}' . $processorSettings['highlight_suffix'];
-
-    return array(
-      'highlight_regex' => $regex,
-      'highlight_limit' => $processorSettings['highlight_limit'],
-    );
   }
 
 }

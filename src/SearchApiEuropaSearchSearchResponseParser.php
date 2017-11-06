@@ -78,7 +78,6 @@ class SearchApiEuropaSearchSearchResponseParser {
 
     foreach ($indexedField as $fieldName => $fieldInfo) {
       $dataType = search_api_extract_inner_type($fieldInfo['type']);
-      $typeInfo = search_api_get_data_type_info($dataType);
 
       $comparableName = str_replace(':', '_', $fieldName);
       $comparableName = strtoupper($comparableName);
@@ -93,7 +92,7 @@ class SearchApiEuropaSearchSearchResponseParser {
           '#value' => $fieldValue,
         );
 
-        if (('string' == $typeInfo['fallback']) && $this->isTextFormatProcessorActive()) {
+        if ($this->isStringDataType($dataType) && $this->isTextFormatProcessorActive()) {
           // Deactivation of the value sanitation in favor of
           // the "search_api_europa_search_processor" process.
           $fields[$fieldName]['#sanitize_callback'] = FALSE;
@@ -134,20 +133,51 @@ class SearchApiEuropaSearchSearchResponseParser {
    * Checks if the text format processor is enabled.
    *
    * @return bool
-   *   True if the "search_api_europa_search_processor" is enable and
-   *   "result_text_format" is no equals to '_none'.
+   *   True if the "europa_search_text_format_enabled" is TRUE and the "Filter"
+   *   module is enabled.
    */
   protected function isTextFormatProcessorActive() {
-    $processors = $this->searchApiQuery->getOption('processors');
-    $processor = $processors['search_api_europa_search_processor'];
-
-    if (!$processor['status'] || !module_exists('filter')) {
+    if (!module_exists('filter')) {
       return FALSE;
     }
 
-    $processorSettings = $processor['settings'];
+    return $this->searchApiQuery->getOption('europa_search_text_format_enabled');
+  }
 
-    return (!empty($processorSettings['result_text_format'])) && ('_none' != $processorSettings['result_text_format']);
+  /**
+   * Checks if the inner data type is of "string" type.
+   *
+   * By default, "", "", "" are of string type.
+   *
+   * @param string $dataType
+   *   The data type to check.
+   *
+   * @return bool
+   *   TRUE, if the data type is of "string" type; otherwise FALSE.
+   *
+   * @see search_api_extract_inner_type()
+   */
+  protected function isStringDataType($dataType) {
+    $stringTypes = &drupal_static(__FUNCTION__, array());
+
+    if (empty($stringTypes)) {
+      $stringTypes = array(
+        'text',
+        'string',
+        'uri',
+      );
+      $typeInfo = search_api_get_item_type_info();
+
+      if (!empty($typeInfo)) {
+        foreach ($typeInfo as $type => $info) {
+          if (isset($typeInfo['fallback']) && ('string' == $typeInfo['fallback'])) {
+            $stringTypes[] = $type;
+          }
+        }
+      }
+    }
+
+    return in_array($dataType, $stringTypes);
   }
 
 }
