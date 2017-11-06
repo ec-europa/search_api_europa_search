@@ -4,6 +4,15 @@
 
 Search API Europa Search module provides a backend for the Search API which uses the "Europa Search" search engine for storing and searching data.
 
+Table of content:
+=================
+- [Introduction](#introduction)
+- [Requirements](#requirements)
+- [Limitations](#limitations)
+- [Installation](#installation)
+  - [For module maintainers](#for-module-maintainers)
+  - [For site builders](#for-site-builders)
+
 ## Introduction
 
 Europa Search is the corporate search engine for the European Commission. 
@@ -174,5 +183,27 @@ Configuring a server pointing the Europa Search services, implies the following 
  
  Without this processor, the Europa Search service will use their default parameters for highlighting texts, and the "check plain" format will be apply
  on all text fields.
+ 
+ ### Multilingualism
+ 
+ The module does not manage the multilingualism itself because Search API do it natively for the "content translation" (i18n) mechanism.
+ 
+ For entities for which the "Entity translation" (ET) mechanism manages translations, the use of the **version 2.x of the "[Search API Entity Translation]**(https://www.drupal.org/project/search_api_et)" 
+ module is required.<br />
+ 
+ #### Entity translation support: Configuration
+ 
+ In order to support multilingual searches based on Entity translation, you need to:
+ * Enable Search API Entity Translation (see above);
+ * Create an Search API index through the Search API index creation form (path: admin/config/search/search_api/add_index) as usual but
+   by selecting one of these Item types to index:
+   - Multilingual Comment (indexing "ET" comments);
+   - Multilingual Node (indexing "ET" contents);
+   - Multilingual File (indexing "ET" files)
+   - Multilingual Taxonomy term (indexing "ET" Taxonomy terms);
+   - Multilingual Taxonomy vocabulary (indexing "ET" Taxonomy vocabularies);
+ * Continue the configuration with the specific configurations detailed the 2 previous sub-sections.
+ 
+In the current version, the module does not support "multiple" Multilingual types; I.E. an index covering several entity types.
 
 
