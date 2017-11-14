@@ -93,19 +93,14 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
       'search_settings' => array(),
     );
 
+    // Fields for the Indexing services settings.
+    // Default values.
     $this->options['ingestion_settings'] += array(
       'ingestion_url_root' => '',
-      'ingestion_url_port' => '',
+      'proxy_settings' => array(),
       'ingestion_api_key' => '',
       'ingestion_database' => '',
       'fallback_language' => language_default('language'),
-    );
-
-    $this->options['search_settings'] += array(
-      'search_url_root' => '',
-      'search_url_port' => '',
-      'search_api_key' => '',
-      'activate_database_filter' => FALSE,
     );
 
     $form['ingestion_settings'] = array(
@@ -113,14 +108,10 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
       '#title' => t('Ingestion services settings (Indexing requests)'),
     );
 
-    $form['ingestion_settings']['ingestion_url_root'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Europa Search Service URL'),
-      '#description' => t('URL root (without the last slash) pointing to the the Europa Search Indexing services (Ingestion API).'),
-      '#required' => TRUE,
-      '#default_value' => $this->options['ingestion_settings']['ingestion_url_root'],
-    );
+    // Fields for defining the proxy settings.
+    $this->buildConnectionSettingsForm($form);
 
+    // Settings specific to the requests.
     $form['ingestion_settings']['ingestion_api_key'] = array(
       '#type' => 'textfield',
       '#title' => t('Registered API key'),
@@ -145,18 +136,24 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
       '#default_value' => $this->options['ingestion_settings']['ingestion_database'],
     );
 
+    // Fields for the Search services settings.
+    // Default values.
+    $this->options['search_settings'] += array(
+      'search_url_root' => '',
+      'proxy_settings' => array(),
+      'search_api_key' => '',
+      'activate_database_filter' => FALSE,
+    );
+
     $form['search_settings'] = array(
       '#type' => 'fieldset',
       '#title' => t('Search API services settings (Search requests)'),
     );
-    $form['search_settings']['search_url_root'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Europa Search Service URL'),
-      '#description' => t('URL root (without the last slash) pointing to the the Europa Search REST services (Search API).'),
-      '#required' => TRUE,
-      '#default_value' => $this->options['search_settings']['search_url_root'],
-    );
 
+    // Fields for defining the proxy settings.
+    $this->buildConnectionSettingsForm($form, 'search_url_root', 'search_settings');
+
+    // Settings specific to the requests.
     $form['search_settings']['search_api_key'] = array(
       '#type' => 'textfield',
       '#title' => t('Registered API key'),
@@ -183,20 +180,159 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
     $url_root = $values['ingestion_settings']['ingestion_url_root'];
     if (!$this->validateConfiguredUrl($url_root)) {
       $formItem = $form['ingestion_settings']['ingestion_url_root'];
-      form_error($formItem, t('The @title is not a valid url', array('@title' => $formItem['#title'])));
+      form_error($formItem, t('The "@title" is not a valid url', array('@title' => $formItem['#title'])));
     }
 
     // Checks the Search Services URL root validity.
     $url_root = $values['search_settings']['search_url_root'];
     if (!$this->validateConfiguredUrl($url_root)) {
       $formItem = $form['search_settings']['search_url_root'];
-      form_error($formItem, t('The @title is not a valid url', array('@title' => $formItem['#title'])));
+      form_error($formItem, t('The "@title" is not a valid url', array('@title' => $formItem['#title'])));
     }
 
     // Secure other saved values: check_plain.
     $values['ingestion_settings']['ingestion_api_key'] = check_plain($values['ingestion_settings']['ingestion_api_key']);
     $values['ingestion_settings']['ingestion_database'] = check_plain($values['ingestion_settings']['ingestion_database']);
     $values['search_settings']['search_api_key'] = check_plain($values['search_settings']['search_api_key']);
+
+    $this->validateAndSecureProxySettings($form, $values, 'ingestion_settings');
+    $this->validateAndSecureProxySettings($form, $values, 'search_settings');
+  }
+
+  /**
+   * Build the service connection settings used in the configuration form.
+   *
+   * @param array $form
+   *   The service configuration form that must service connection fields.
+   * @param string $urlRootKey
+   *   The array key cf the form item containing the URL root.
+   * @param string $proxySettingsKey
+   *   The array key cf the form item containing the proxy settings.
+   *
+   * @see SearchApiEuropaSearchService::configurationForm()
+   */
+  protected function buildConnectionSettingsForm(array &$form, $urlRootKey = 'ingestion_url_root', $proxySettingsKey = 'ingestion_settings') {
+    $form[$proxySettingsKey][$urlRootKey] = array(
+      '#type' => 'textfield',
+      '#title' => t('Europa Search Service URL'),
+      '#description' => t('URL root (without the last slash) pointing to the the Europa Search Indexing services (Ingestion API).'),
+      '#required' => TRUE,
+      '#default_value' => $this->options[$proxySettingsKey][$urlRootKey],
+    );
+
+    $form[$proxySettingsKey]['proxy_settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Proxy settings for accessing the services'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    // Default values.
+    $proxySettings = $this->options[$proxySettingsKey]['proxy_settings'];
+
+    $proxySettings += array(
+      'configuration_type' => 'default',
+      'custom_address' => '',
+      'user_name' => '',
+      'user_password' => '',
+    );
+
+    $form[$proxySettingsKey]['proxy_settings']['configuration_type'] = array(
+      '#type' => 'select',
+      '#title' => t('Configuration type'),
+      '#description' => t('The type of proxy configuration to use for requests.'),
+      '#required' => TRUE,
+      '#options' => array(
+        'default' => t("Host system's settings"),
+        'custom' => t("Specific proxy's settings"),
+        'none' => t('Bypass proxy'),
+      ),
+      '#default_value' => $proxySettings['configuration_type'],
+    );
+
+    $form[$proxySettingsKey]['proxy_settings']['custom_address'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Proxy URL'),
+      '#description' => t('The proxy\'s URL to use. Only mandatory and taken into account if the configuration type is "Specific proxy\'s settings"'),
+      '#default_value' => $proxySettings['custom_address'],
+    );
+
+    $form[$proxySettingsKey]['proxy_settings']['user_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Proxy user name'),
+      '#description' => t('The proxy\'s credentials user name. Only taken into account if the configuration type is "Specific proxy\'s settings"'),
+      '#default_value' => $proxySettings['user_name'],
+    );
+
+    $form[$proxySettingsKey]['proxy_settings']['user_password'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Proxy user name'),
+      '#description' => t('The proxy\'s credentials user password. Only taken into account if the configuration type is "Specific proxy\'s settings"'),
+      '#default_value' => $proxySettings['user_password'],
+    );
+  }
+
+  /**
+   * Validates and secure proxy related form values.
+   *
+   * @param array $form
+   *   The Server configuration form.
+   * @param array $values
+   *   The inserted configuration values to validate.
+   * @param string $proxySettingsKey
+   *   The array key cf the value item containing the proxy settings.
+   *
+   * @see SearchApiEuropaSearchService::configurationFormValidate()
+   */
+  protected function validateAndSecureProxySettings(array $form, array &$values, $proxySettingsKey = 'ingestion_settings') {
+    $proxySettings = &$values[$proxySettingsKey]['proxy_settings'];
+
+    if ('custom' != $proxySettings['configuration_type']) {
+      // If the settings imply the system's proxy or  nor pxy, no need to go on.
+      // We just reset proxy related values.
+      $proxySettings['custom_address'] = '';
+      $proxySettings['user_name'] = '';
+      $proxySettings['user_password'] = '';
+      return;
+    }
+
+    // Secure text values.
+    if (!empty($proxySettings['user_name'])) {
+      $proxySettings['user_name'] = check_plain($proxySettings['user_name']);
+    }
+
+    if (!empty($proxySettings['user_password'])) {
+      $proxySettings['user_password'] = check_plain($proxySettings['user_password']);
+    }
+
+    $formItem = $form[$proxySettingsKey]['proxy_settings']['custom_address'];
+    $formTitle = $formItem['#title'];
+    if (empty($proxySettings['custom_address'])) {
+      $tParameters = array(
+        '@title' => $formTitle,
+        '@select' => $form[$proxySettingsKey]['proxy_settings']['configuration_type']['#title'],
+      );
+      form_error($formItem, t('The "@title" must be set if "@select" is "Specific proxy\'s settings"', $tParameters));
+
+      return;
+    }
+
+    $proxyAddress = $proxySettings['custom_address'];
+    $proxyUrl = parse_url($proxyAddress);
+    $addressMessage = t('The "@title" is not a valid URL', array('@title' => $formTitle));
+    if (!$proxyUrl || !isset($proxyUrl['scheme'])) {
+      form_error($formItem, $addressMessage);
+
+      return;
+    }
+
+    // We redefine the URL scheme in order to use the validate_url function
+    // that support http and https only.
+    $urlToValidate = str_replace($proxyUrl['scheme'] . '://', 'http://', $proxyAddress);
+    if (!valid_url($urlToValidate)) {
+      form_error($formItem, $addressMessage);
+
+      return;
+    }
   }
 
   /**
@@ -222,6 +358,7 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
       'url_root' => $fullRoot,
       'api_key' => $option['ingestion_api_key'],
       'database' => $option['ingestion_database'],
+      'proxy' => $option['proxy_settings'],
     );
 
     $option = $this->options['search_settings'];
@@ -229,6 +366,7 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
     $searchSettings = array(
       'url_root' => $fullRoot,
       'api_key' => $option['search_api_key'],
+      'proxy' => $option['proxy_settings'],
     );
     $clientConfiguration = array(
       'indexing_settings' => $indexingSettings,
