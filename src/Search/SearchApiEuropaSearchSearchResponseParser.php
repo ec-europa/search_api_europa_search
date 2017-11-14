@@ -1,5 +1,7 @@
 <?php
 
+namespace Drupal\search_api_europa_search\Search;
+
 use EC\EuropaSearch\Messages\Search\SearchResponse;
 use EC\EuropaSearch\Messages\Search\SearchResult;
 
@@ -13,24 +15,24 @@ class SearchApiEuropaSearchSearchResponseParser {
   /**
    * The Search API index related to the Search related responses objects.
    *
-   * @var SearchApiQueryInterface
+   * @var \SearchApiQueryInterface
    */
   private $searchApiQuery;
 
   /**
    * SearchApiEuropaSearchSearchResponseParser constructor.
    *
-   * @param SearchApiQueryInterface $query
+   * @param \SearchApiQueryInterface $query
    *   The Search Api query related to the responses to treat.
    */
-  public function __construct(SearchApiQueryInterface $query) {
+  public function __construct(\SearchApiQueryInterface $query) {
     $this->searchApiQuery = $query;
   }
 
   /**
    * Parses a SearchResponse object into an array supported by Search API.
    *
-   * @param EC\EuropaSearch\Messages\Search\SearchResponse $response
+   * @param \EC\EuropaSearch\Messages\Search\SearchResponse $response
    *   The Search response object to parse.
    *
    * @return array
@@ -62,7 +64,7 @@ class SearchApiEuropaSearchSearchResponseParser {
   /**
    * Parse metadata of the search result to retrieve Search API fields.
    *
-   * @param EC\EuropaSearch\Messages\Search\SearchResult $result
+   * @param \EC\EuropaSearch\Messages\Search\SearchResult $result
    *   The search results where to find the metadata.
    *
    * @return array

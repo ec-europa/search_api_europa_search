@@ -1,5 +1,11 @@
 <?php
 
+namespace Drupal\search_api_europa_search;
+
+use Drupal\search_api_europa_search\Traits\SearchApiEuropaSearchUtil;
+use Drupal\search_api_europa_search\Index\SearchApiEuropaSearchIndexSender;
+use Drupal\search_api_europa_search\Search\SearchApiEuropaSearchSearchSender;
+use Drupal\search_api_europa_search\Search\SearchApiEuropaSearchSearchResponseParser;
 use EC\EuropaSearch\EuropaSearch;
 use Psr\Log\LogLevel;
 use EC\EuropaSearch\Exceptions\ValidationException;
@@ -10,6 +16,8 @@ use EC\EuropaSearch\Exceptions\ValidationException;
  * Defines the Europa Search service for Search API.
  */
 class SearchApiEuropaSearchService extends \SearchApiAbstractService {
+
+  use SearchApiEuropaSearchUtil;
 
   protected $ESClientFactory;
 
@@ -26,7 +34,7 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
   /**
    * {@inheritdoc}
    */
-  public function indexItems(SearchApiIndex $index, array $items) {
+  public function indexItems(\SearchApiIndex $index, array $items) {
     $this->initEuropaSearchClient();
 
     $returned_keys = array();
@@ -53,11 +61,11 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
   /**
    * {@inheritdoc}
    */
-  public function deleteItems($ids = 'all', SearchApiIndex $index = NULL) {
+  public function deleteItems($ids = 'all', \SearchApiIndex $index = NULL) {
     $this->initEuropaSearchClient();
 
     if (is_string($ids) && ('all' == $ids)) {
-      throw new Exception('Unsupported action, a full index deletion is not supported yet by the Search API Europa Search module.');
+      throw new \Exception('Unsupported action, a full index deletion is not supported yet by the Search API Europa Search module.');
     }
 
     $indexDeleteSender = new SearchApiEuropaSearchIndexSender($this->ESClientFactory, $this->options['ingestion_settings']['fallback_language']);
@@ -89,7 +97,7 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
   /**
    * {@inheritdoc}
    */
-  public function search(SearchApiQueryInterface $query) {
+  public function search(\SearchApiQueryInterface $query) {
     $this->initEuropaSearchClient();
 
     try {
@@ -416,7 +424,7 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
    *   The type of the entities to delete.
    * @param array $entityIds
    *   The ids of the entities to delete.
-   * @param SearchApiEuropaSearchIndexSender $indexDeleteSender
+   * @param \Drupal\search_api_europa_search\Index\SearchApiEuropaSearchIndexSender $indexDeleteSender
    *   The object that will send the deletion message to the
    *   Europa Search services.
    */
@@ -424,7 +432,7 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
     $entities = entity_load($entityType, $entityIds);
     foreach ($entities as $id => $entity) {
       $language = entity_language($entityType, $entity);
-      $referenceToDelete = SearchApiEuropaSearchAlterAddReference::getEuropaSearchReferenceValue($entityType, $id, $language);
+      $referenceToDelete = $this->getEuropaSearchReferenceValue($entityType, $id, $language);
       $indexDeleteSender->sendDeletionMessage($referenceToDelete);
     }
   }

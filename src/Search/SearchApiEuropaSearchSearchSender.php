@@ -1,5 +1,8 @@
 <?php
 
+namespace Drupal\search_api_europa_search\Search;
+
+use Drupal\search_api_europa_search\SearchApiEuropaSearchMetadataBuilder;
 use EC\EuropaSearch\Messages\Search\SearchMessage;
 use EC\EuropaSearch\EuropaSearch;
 
@@ -38,14 +41,14 @@ class SearchApiEuropaSearchSearchSender {
   /**
    * Sends the built message to the Europa Search services.
    *
-   * @param SearchApiQueryInterface $query
+   * @param \SearchApiQueryInterface $query
    *   The Search API query object.
    *
    * @return string
    *   The reference of the indexing element returned by the
    *   Europa Search service.
    */
-  public function sendMessage(SearchApiQueryInterface $query) {
+  public function sendMessage(\SearchApiQueryInterface $query) {
     $this->buildMessageObject($query);
     return $this->clientFactory->getSearchApplication()->sendMessage($this->searchMessage);
   }
@@ -53,10 +56,10 @@ class SearchApiEuropaSearchSearchSender {
   /**
    * Builds the SearchMessage object.
    *
-   * @param SearchApiQueryInterface $query
+   * @param \SearchApiQueryInterface $query
    *   The Search API query object.
    */
-  public function buildMessageObject(SearchApiQueryInterface $query) {
+  public function buildMessageObject(\SearchApiQueryInterface $query) {
     $searchOptions = $query->getOptions();
     $searchApiIndex = $query->getIndex();
     $sortDefinitions = $query->getSort();
@@ -151,12 +154,12 @@ class SearchApiEuropaSearchSearchSender {
   /**
    * Builds the Europa Search query based on the Search API filters.
    *
-   * @param SearchApiQueryInterface $searchApiQuery
+   * @param \SearchApiQueryInterface $searchApiQuery
    *   The query sent by Search API.
    * @param array $indexedFields
    *   The fields that are indexed in Search API.
    */
-  protected function buildEuropaSearchQuery(SearchApiQueryInterface $searchApiQuery, array $indexedFields) {
+  protected function buildEuropaSearchQuery(\SearchApiQueryInterface $searchApiQuery, array $indexedFields) {
     $builder = new SearchApiEuropaSearchQueryBuilder($searchApiQuery, $indexedFields);
     $query = $builder->getQuery();
     $this->searchMessage->setQuery($query);

@@ -1,5 +1,7 @@
 <?php
 
+namespace Drupal\search_api_europa_search;
+
 use EC\EuropaSearch\Messages\Components\DocumentMetadata\DateMetadata;
 
 /**
@@ -50,7 +52,7 @@ class SearchApiEuropaSearchMetadataBuilder {
    * @return \EC\EuropaSearch\Messages\Components\DocumentMetadata\AbstractMetadata
    *   The AbstractMetadata extension object.
    *
-   * @throws Exception
+   * @throws \Exception
    *   Raised if the entity data type is not supported by the message class.
    */
   public function convertField($fieldName, $fieldType, array $metadataValues = array()) {

@@ -1,5 +1,7 @@
 <?php
 
+namespace Drupal\search_api_europa_search\Search;
+
 /**
  * Class SearchApiOperator.
  *
@@ -22,7 +24,7 @@ class SearchApiEuropaSearchOperators {
    *   The list of existing operators.
    */
   public static function getSearchApiOperatorList() {
-    $class = new ReflectionClass(__CLASS__);
+    $class = new \ReflectionClass(__CLASS__);
     return $class->getConstants();
   }
 

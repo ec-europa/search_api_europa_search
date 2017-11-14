@@ -1,5 +1,8 @@
 <?php
 
+namespace Drupal\search_api_europa_search\Search;
+
+use Drupal\search_api_europa_search\SearchApiEuropaSearchMetadataBuilder;
 use EC\EuropaSearch\Messages\Components\Filters\Queries\BooleanQuery;
 use EC\EuropaSearch\Messages\Components\Filters\BoostableFilter;
 use EC\EuropaSearch\Messages\Components\Filters\Clauses\FieldExistsClause;
@@ -26,12 +29,12 @@ class SearchApiEuropaSearchQueryBuilder {
   /**
    * SearchApiEuropaSearchQueryBuilder constructor.
    *
-   * @param SearchApiQueryInterface $searchApiQuery
+   * @param \SearchApiQueryInterface $searchApiQuery
    *   The query supplied by Search API.
    * @param array $indexedFields
    *   Array of data about fields indexed in Search API.
    */
-  public function __construct(SearchApiQueryInterface $searchApiQuery, array $indexedFields) {
+  public function __construct(\SearchApiQueryInterface $searchApiQuery, array $indexedFields) {
     $this->indexedFields = $indexedFields;
     $this->searchApiQuery = $searchApiQuery;
     $this->europaSearchQuery = new BooleanQuery();
@@ -45,7 +48,7 @@ class SearchApiEuropaSearchQueryBuilder {
   /**
    * Gets the built query.
    *
-   * @return EC\EuropaSearch\Messages\Components\Filters\Queries\BooleanQuery
+   * @return \EC\EuropaSearch\Messages\Components\Filters\Queries\BooleanQuery
    *   The query fully built.
    */
   public function getQuery() {
@@ -55,12 +58,12 @@ class SearchApiEuropaSearchQueryBuilder {
   /**
    * Builds the Europa Search query based on the defined Search API filters.
    *
-   * @param SearchApiQueryFilter $searchApiFilter
+   * @param \SearchApiQueryFilter $searchApiFilter
    *   The object defining the Search API filters.
-   * @param EC\EuropaSearch\Messages\Components\Filters\BoostableFilter $parentQuery
+   * @param \EC\EuropaSearch\Messages\Components\Filters\BoostableFilter $parentQuery
    *   The Europa Search query to build.
    */
-  protected function buildQuery(SearchApiQueryFilter $searchApiFilter, BoostableFilter $parentQuery) {
+  protected function buildQuery(\SearchApiQueryFilter $searchApiFilter, BoostableFilter $parentQuery) {
     $subFilters = $searchApiFilter->getFilters();
     $conjunction = $searchApiFilter->getConjunction();
 
@@ -93,10 +96,10 @@ class SearchApiEuropaSearchQueryBuilder {
    * @param string $conjunction
    *   The conjunction defined in the Search API filter where the current
    *   clause is.
-   * @param EC\EuropaSearch\Messages\Components\Filters\BoostableFilter $parentQuery
+   * @param \EC\EuropaSearch\Messages\Components\Filters\BoostableFilter $parentQuery
    *   The BooleanQuery that must use this clause.
    *
-   * @throws Exception
+   * @throws \Exception
    *    Rasied if the filter clause operator is unknown.
    */
   protected function buildClause(array $searchApiClause, $conjunction, BoostableFilter $parentQuery) {
@@ -142,14 +145,14 @@ class SearchApiEuropaSearchQueryBuilder {
   /**
    * Gets a RangeClause implementation for the Search API "Range" filter.
    *
-   * @param EC\EuropaSearch\Messages\Components\DocumentMetadata\AbstractMetadata $impliedMetadata
+   * @param \EC\EuropaSearch\Messages\Components\DocumentMetadata\AbstractMetadata $impliedMetadata
    *   The metadata implied in the filter.
    * @param mixed $clauseValue
    *   The value to set for the filter.
    * @param string $operator
    *   The Search API operator set with the clause.
    *
-   * @return EC\EuropaSearch\Messages\Components\Filters\Clauses\RangeClause
+   * @return \EC\EuropaSearch\Messages\Components\Filters\Clauses\RangeClause
    *   The RangeClause object to use in the query.
    */
   protected function getEuropaSearchRangeClause(AbstractMetadata $impliedMetadata, $clauseValue, $operator) {
@@ -179,12 +182,12 @@ class SearchApiEuropaSearchQueryBuilder {
   /**
    * Gets a AbstractClause implementation for the Search API "Equals" filter.
    *
-   * @param EC\EuropaSearch\Messages\Components\DocumentMetadata\AbstractMetadata $impliedMetadata
+   * @param \EC\EuropaSearch\Messages\Components\DocumentMetadata\AbstractMetadata $impliedMetadata
    *   The metadata implied in the filter.
    * @param mixed $clauseValue
    *   The value to set for the filter.
    *
-   * @return EC\EuropaSearch\Messages\Components\Filters\Clauses\TermClause|EC\EuropaSearch\Messages\Components\Filters\Clauses\TermsClause
+   * @return \EC\EuropaSearch\Messages\Components\Filters\Clauses\TermClause|\EC\EuropaSearch\Messages\Components\Filters\Clauses\TermsClause
    *   The corresponding AbstractClause implementation; TermsClause is an array;
    *   otherwise TermClause.
    */
@@ -209,7 +212,7 @@ class SearchApiEuropaSearchQueryBuilder {
    *   The normalized version of the Search API filter clause.
    * @param string $conjunction
    *   The Search API conjunction related to the clause.
-   * @param EC\EuropaSearch\Messages\Components\Filters\BoostableFilter $parentQuery
+   * @param \EC\EuropaSearch\Messages\Components\Filters\BoostableFilter $parentQuery
    *   The Europa Search query object elated to the clause to set.
    */
   protected function setEuropaSearchFieldExistClause(array $normalizedClause, $conjunction, BoostableFilter $parentQuery) {
@@ -239,7 +242,7 @@ class SearchApiEuropaSearchQueryBuilder {
    * @return string
    *   The corresponding BooleanQuery method name.
    *
-   * @throws Exception
+   * @throws \Exception
    *   Rasied if the conjunction is not linked to a BooleanQuery method name.
    */
   protected function getEuropaSearchConjunctionClauseMethod($conjunction, $fieldName) {
@@ -253,7 +256,7 @@ class SearchApiEuropaSearchQueryBuilder {
       return $clausesConjunctions[$conjunction];
     }
 
-    throw new Exception(t('Undefined conjunction :conjunction for :field_name field!',
+    throw new \Exception(t('Undefined conjunction :conjunction for :field_name field!',
       array(':conjunction' => $conjunction, ':field_name' => $fieldName)));
   }
 

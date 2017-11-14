@@ -14,7 +14,7 @@ function search_api_europa_search_search_api_service_info() {
   $services['europa_search_service'] = array(
     'name' => t('Europa Search Service'),
     'description' => t('Service for Europa search engine.'),
-    'class' => 'SearchApiEuropaSearchService',
+    'class' => 'Drupal\search_api_europa_search\SearchApiEuropaSearchService',
   );
 
   return $services;
@@ -27,7 +27,7 @@ function search_api_europa_search_search_api_alter_callback_info() {
   $callbacks['search_api_europa_search_alter_add_reference'] = array(
     'name' => t('Europa Search reference'),
     'description' => t("Adds a specific reference (id) to the indexed data."),
-    'class' => 'SearchApiEuropaSearchAlterAddReference',
+    'class' => 'Drupal\search_api_europa_search\SearchApiEuropaSearchAlterAddReference',
   );
 
   return $callbacks;
@@ -42,7 +42,7 @@ function search_api_europa_search_search_api_processor_info() {
     'description' => t('Configure the highlighting that Europa Search services must apply results,
     and the text format to apply on the text fields returned with results.<br/> 
     <strong>Do not use it with the "Highlighting" and "HTML filter" processors!</strong>'),
-    'class' => 'SearchApiEuropaSearchProcessor',
+    'class' => 'Drupal\search_api_europa_search\SearchApiEuropaSearchProcessor',
     'weight' => 40,
   );
 

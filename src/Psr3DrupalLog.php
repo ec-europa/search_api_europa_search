@@ -5,6 +5,8 @@
  * Contains the definitions of Psr3DrupalLog and Psr3LogContextConvert classes.
  */
 
+namespace Drupal\search_api_europa_search;
+
 use Psr\Log\AbstractLogger;
 use Psr\Log\LogLevel;
 

@@ -1,9 +1,15 @@
 <?php
 
+namespace Drupal\search_api_europa_search;
+
+use Drupal\search_api_europa_search\Traits\SearchApiEuropaSearchUtil;
+
 /**
  * Search API data alteration callback that adds an reference for all items.
  */
-class SearchApiEuropaSearchAlterAddReference extends SearchApiAbstractAlterCallback {
+class SearchApiEuropaSearchAlterAddReference extends \SearchApiAbstractAlterCallback {
+
+  use SearchApiEuropaSearchUtil;
 
   /**
    * {@inheritdoc}
@@ -24,7 +30,7 @@ class SearchApiEuropaSearchAlterAddReference extends SearchApiAbstractAlterCallb
         'entity_type' => $entityType,
         'entity_id' => $entityId,
         'entity_language' => $language,
-        'sent_reference' => self::getEuropaSearchReferenceValue($entityType, $entityId, $language),
+        'sent_reference' => $this->getEuropaSearchReferenceValue($entityType, $entityId, $language),
       );
 
       $item->search_api_europa_search_reference = $entityReference;
@@ -42,23 +48,6 @@ class SearchApiEuropaSearchAlterAddReference extends SearchApiAbstractAlterCallb
         'type' => 'string',
       ),
     );
-  }
-
-  /**
-   * Gets the Europa Search reference.
-   *
-   * @param string $entityType
-   *   The type of the entity from which retrieving the reference.
-   * @param string $entityId
-   *   The id of the entity from which retrieving the reference.
-   * @param string $entityLanguage
-   *   The language of the entity from which retrieving the reference.
-   *
-   * @return string
-   *   The reference value.
-   */
-  public static function getEuropaSearchReferenceValue($entityType, $entityId, $entityLanguage) {
-    return $entityType . '__' . $entityId . '__' . $entityLanguage;
   }
 
 }

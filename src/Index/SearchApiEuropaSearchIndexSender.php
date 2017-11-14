@@ -1,5 +1,8 @@
 <?php
 
+namespace Drupal\search_api_europa_search\Index;
+
+use Drupal\search_api_europa_search\SearchApiEuropaSearchMetadataBuilder;
 use EC\EuropaSearch\Messages\Index\IndexingWebContent;
 use EC\EuropaSearch\Messages\Index\IndexedItemDeletionMessage;
 use EC\EuropaSearch\EuropaSearch;
@@ -14,7 +17,7 @@ class SearchApiEuropaSearchIndexSender {
   /**
    * The EuropaSearch client factory managing the Europa Search connection.
    *
-   * @var EC\EuropaSearch\EuropaSearch
+   * @var \EC\EuropaSearch\EuropaSearch
    */
   protected $clientFactory;
 
@@ -49,7 +52,7 @@ class SearchApiEuropaSearchIndexSender {
    *   The reference of the indexing element returned by the
    *   Europa Search service.
    *
-   * @throws Exception
+   * @throws \Exception
    *   Raised if
    *   - The entity type is "file".
    *     The module does not support it now.
@@ -81,7 +84,7 @@ class SearchApiEuropaSearchIndexSender {
    * @return bool
    *   True if the deletion is successful.
    *
-   * @throws Exception
+   * @throws \Exception
    *   Raised if
    *   - The entity type is "file".
    *     The module does not support it now.
@@ -100,7 +103,7 @@ class SearchApiEuropaSearchIndexSender {
    * @param array $indexedItem
    *   The entity data to sent for indexing.
    *
-   * @return EC\EuropaSearch\Messages\Index\IndexingWebContent
+   * @return \EC\EuropaSearch\Messages\Index\IndexingWebContent
    *   The message for a web content indexing.
    */
   protected function buildWebContentMessage(array $indexedItem) {
@@ -145,7 +148,7 @@ class SearchApiEuropaSearchIndexSender {
    * @param string $referenceToDelete
    *   The ES reference to sent for deleting it from the index.
    *
-   * @return EC\EuropaSearch\Messages\Index\IndexedItemDeletionMessage
+   * @return \EC\EuropaSearch\Messages\Index\IndexedItemDeletionMessage
    *   The message for a index deletion.
    */
   protected function buildIndexedItemDeletionMessage($referenceToDelete) {
@@ -166,7 +169,7 @@ class SearchApiEuropaSearchIndexSender {
    * @return \EC\EuropaSearch\Messages\Components\DocumentMetadata\AbstractMetadata
    *   The entity metadata to add to the message.
    *
-   * @throws Exception
+   * @throws \Exception
    *   Raised if the entity data type is not supported by the message class.
    */
   protected function getEntityMetadata($dataName, array $data) {

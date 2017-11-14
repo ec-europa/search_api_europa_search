@@ -1,5 +1,7 @@
 <?php
 
+namespace Drupal\search_api_europa_search;
+
 /**
  * Processor for specific results treatment on the Europa Search query results.
  *
@@ -8,7 +10,7 @@
  *   Europa Search services.
  * - Applying a text format on any strings.
  */
-class SearchApiEuropaSearchProcessor extends SearchApiAbstractProcessor {
+class SearchApiEuropaSearchProcessor extends \SearchApiAbstractProcessor {
 
   /**
    * {@inheritdoc}
@@ -70,7 +72,7 @@ class SearchApiEuropaSearchProcessor extends SearchApiAbstractProcessor {
   public function configurationFormValidate(array $form, array &$values, array &$form_state) {
     // Check that prefix and suffix values are correctly set.
     $testedString = $values['highlight_prefix'] . 'Test string' . $values['highlight_suffix'];
-    $doc = new DOMDocument();
+    $doc = new \DOMDocument();
     $doc->validateOnParse = TRUE;
     libxml_use_internal_errors(TRUE);
     $doc->loadHTML($testedString);
@@ -102,7 +104,7 @@ class SearchApiEuropaSearchProcessor extends SearchApiAbstractProcessor {
    *
    * It injects the Europa Search Highlighting settings into the query options.
    */
-  public function preprocessSearchQuery(SearchApiQuery $query) {
+  public function preprocessSearchQuery(\SearchApiQuery $query) {
     parent::preprocessSearchQuery($query);
 
     $regex = $this->options['highlight_prefix'] . '{}' . $this->options['highlight_suffix'];
@@ -122,7 +124,7 @@ class SearchApiEuropaSearchProcessor extends SearchApiAbstractProcessor {
    *
    * It applies the text format on text fields.
    */
-  public function postprocessSearchResults(array &$response, SearchApiQuery $query) {
+  public function postprocessSearchResults(array &$response, \SearchApiQuery $query) {
 
     if (empty($response['results'])) {
       return;
