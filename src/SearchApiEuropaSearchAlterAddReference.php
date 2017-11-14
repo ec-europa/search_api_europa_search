@@ -24,7 +24,7 @@ class SearchApiEuropaSearchAlterAddReference extends SearchApiAbstractAlterCallb
         'entity_type' => $entityType,
         'entity_id' => $entityId,
         'entity_language' => $language,
-        'sent_reference' => self::getReferenceValue($entityType, $entityId, $language),
+        'sent_reference' => self::getEuropaSearchReferenceValue($entityType, $entityId, $language),
       );
 
       $item->search_api_europa_search_reference = $entityReference;
