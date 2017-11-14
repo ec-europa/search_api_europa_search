@@ -1,6 +1,7 @@
 <?php
 
 use EC\EuropaSearch\Messages\Index\IndexingWebContent;
+use EC\EuropaSearch\Messages\Index\IndexedItemDeletionMessage;
 use EC\EuropaSearch\EuropaSearch;
 
 /**
@@ -39,7 +40,7 @@ class SearchApiEuropaSearchIndexSender {
   }
 
   /**
-   * Sends the built message to the Europa Search services.
+   * Sends the indexing message to the Europa Search services.
    *
    * @param array $indexedItem
    *   The entity data to sent for indexing.
@@ -54,7 +55,7 @@ class SearchApiEuropaSearchIndexSender {
    *     The module does not support it now.
    *   - 'search_api_europa_search_reference' is not set for the indexed item.
    */
-  public function sendMessage(array $indexedItem) {
+  public function sendIndexingMessage(array $indexedItem) {
     if (!isset($indexedItem['search_api_europa_search_reference'])) {
       throw new \Exception(t('The "search_api_europa_search_reference" field is missing.'));
     }
@@ -69,6 +70,28 @@ class SearchApiEuropaSearchIndexSender {
     $indexingMessage = $this->buildWebContentMessage($indexedItem);
 
     return $this->clientFactory->getIndexingApplication()->sendMessage($indexingMessage);
+  }
+
+  /**
+   * Sends the index deletion message to the Europa Search services.
+   *
+   * @param string $referenceToDelete
+   *   The reference of the index item to delete.
+   *
+   * @return bool
+   *   True if the deletion is successful.
+   *
+   * @throws Exception
+   *   Raised if
+   *   - The entity type is "file".
+   *     The module does not support it now.
+   *   - 'search_api_europa_search_reference' is not set for the indexed item.
+   */
+  public function sendDeletionMessage($referenceToDelete) {
+
+    $deletionMessage = $this->buildIndexedItemDeletionMessage($referenceToDelete);
+
+    return $this->clientFactory->getIndexingApplication()->sendMessage($deletionMessage);
   }
 
   /**
@@ -121,9 +144,15 @@ class SearchApiEuropaSearchIndexSender {
    *
    * @param string $referenceToDelete
    *   The ES reference to sent for deleting it from the index.
+   *
+   * @return EC\EuropaSearch\Messages\Index\IndexedItemDeletionMessage
+   *   The message for a index deletion.
    */
-  protected function buildIndexedItemDeleteMessage($referenceToDelete) {
-    // TODO: Implement after the closure of the ticket SEARCH-2346.
+  protected function buildIndexedItemDeletionMessage($referenceToDelete) {
+    $deletionMessage = new IndexedItemDeletionMessage();
+    $deletionMessage->setDocumentId($referenceToDelete);
+
+    return $deletionMessage;
   }
 
   /**

@@ -34,7 +34,7 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
 
     foreach ($items as $id => $item) {
       try {
-        $reference = $indexSender->sendMessage($item);
+        $reference = $indexSender->sendIndexingMessage($item);
         watchdog('Search API Europa Search', 'reference received from the ES services: @ref.', array('@ref' => print_r($reference, TRUE)), WATCHDOG_INFO);
         $returned_keys[] = $id;
       }
@@ -54,7 +54,36 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
    * {@inheritdoc}
    */
   public function deleteItems($ids = 'all', SearchApiIndex $index = NULL) {
-    // TODO: Implement deleteItems() method after the ticket SEARCH-2346.
+    $this->initEuropaSearchClient();
+
+    if (is_string($ids) && ('all' == $ids)) {
+      throw new Exception('Unsupported action, a full index deletion is not supported yet by the Search API Europa Search module.');
+    }
+
+    $indexDeleteSender = new SearchApiEuropaSearchIndexSender($this->ESClientFactory, $this->options['ingestion_settings']['fallback_language']);
+    $basicEntityType = $index->item_type;
+
+    if ('multiple' != $basicEntityType) {
+      // Deletion treatment for index that covers only one entity type.
+      $this->deleteEntities($basicEntityType, $ids, $indexDeleteSender);
+
+      return;
+    }
+
+    // Deletion treatment for index that covers multiple entity types.
+    $entityInfos = array();
+    // Organize the index item by entity types.
+    foreach ($ids as $id) {
+      list($entityType, $entityId) = explode('/', $id);
+      if (!isset($entityInfos[$entityType])) {
+        $entityInfos[$entityType] = array();
+      }
+      $entityInfos[$entityType][] = $entityId;
+    }
+
+    foreach ($entityInfos as $type => $entityInfo) {
+      $this->deleteEntities($type, $entityInfo, $indexDeleteSender);
+    }
   }
 
   /**
@@ -378,6 +407,26 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
     );
 
     $this->ESClientFactory = new EuropaSearch($clientConfiguration);
+  }
+
+  /**
+   * Sends deletion message for entities of a certain type.
+   *
+   * @param string $entityType
+   *   The type of the entities to delete.
+   * @param array $entityIds
+   *   The ids of the entities to delete.
+   * @param SearchApiEuropaSearchIndexSender $indexDeleteSender
+   *   The object that will send the deletion message to the
+   *   Europa Search services.
+   */
+  protected function deleteEntities($entityType, array $entityIds, SearchApiEuropaSearchIndexSender $indexDeleteSender) {
+    $entities = entity_load($entityType, $entityIds);
+    foreach ($entities as $id => $entity) {
+      $language = entity_language($entityType, $entity);
+      $referenceToDelete = SearchApiEuropaSearchAlterAddReference::getEuropaSearchReferenceValue($entityType, $id, $language);
+      $indexDeleteSender->sendDeletionMessage($referenceToDelete);
+    }
   }
 
 }

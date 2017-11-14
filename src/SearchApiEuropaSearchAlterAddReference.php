@@ -12,19 +12,21 @@ class SearchApiEuropaSearchAlterAddReference extends SearchApiAbstractAlterCallb
     foreach ($items as &$item) {
       $entityType = $this->index->datasource()->getEntityType();
       $entityId = $this->index->datasource()->getItemId($item);
-      $referenceToSend = $entityType;
-      $referenceToSend .= '__' . $entityId;
+
+      // Multi type case.
+      if (empty($entityType)) {
+        list($entityType, $entityId) = explode('/', $entityId);
+      }
+
+      $language = (entity_language($entityType, $item)) ?: LANGUAGE_NONE;
+
       $entityReference = array(
         'entity_type' => $entityType,
         'entity_id' => $entityId,
+        'entity_language' => $language,
+        'sent_reference' => self::getReferenceValue($entityType, $entityId, $language),
       );
 
-      $language = (entity_language($entityType, $item)) ?: LANGUAGE_NONE;
-      if ($language) {
-        $entityReference['entity_language'] = $language;
-        $referenceToSend .= '__' . $language;
-      }
-      $entityReference['sent_reference'] = $referenceToSend;
       $item->search_api_europa_search_reference = $entityReference;
     }
   }
@@ -40,6 +42,23 @@ class SearchApiEuropaSearchAlterAddReference extends SearchApiAbstractAlterCallb
         'type' => 'string',
       ),
     );
+  }
+
+  /**
+   * Gets the Europa Search reference.
+   *
+   * @param string $entityType
+   *   The type of the entity from which retrieving the reference.
+   * @param string $entityId
+   *   The id of the entity from which retrieving the reference.
+   * @param string $entityLanguage
+   *   The language of the entity from which retrieving the reference.
+   *
+   * @return string
+   *   The reference value.
+   */
+  public static function getEuropaSearchReferenceValue($entityType, $entityId, $entityLanguage) {
+    return $entityType . '__' . $entityId . '__' . $entityLanguage;
   }
 
 }
