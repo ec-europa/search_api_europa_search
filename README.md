@@ -146,18 +146,41 @@ Configuring a server pointing the Europa Search services, implies the following 
 "Add server" form of the Search API admin interface:
  
  1. **Service class**: Select the "_Europa Search Service_";
- 2. **Europa Search Service domain name**: Type the URL root (domain name) where the ES services are hosted; I.E. 
- the URL part common to all Europa search services;
- 3. **Europa Search Service url port** (optional): the port number define to access the Europa search services;
+ 2. **Ingestion services settings (Indexing requests) > Europa Search Service URL**: Type the URL where the ES Indexing services are hosted;
+ 3. **Ingestion services settings (Indexing requests) > Proxy settings for accessing the services**: Fields for configuring the proxy to use to connect 
+    the services<br />.
+    If the host system settings are enough, leave the child fields untouched; I.E.:
+    * _Configuration type_ : The type of configuration to use:
+      * "Host system's settings": The module will use the same proxy as the host system uses;
+      * "Specific proxy's settings": The module will use the proxy different than the host system uses;<br />
+        Then, the "Proxy URL" field must be filled.
+      * "Bypass proxy": The module will send requests without passing to any proxy;
+    * _Proxy URL_ : The URL of the specific proxy to use (mandatory if the "Configuration type" value is "Host system's settings");
+    * _Proxy user name_ : The user name to use for the Proxy credentials;
+    * _Proxy password_ : The password to use for the Proxy credentials;
  4. **Ingestion services settings (Indexing requests) > Registered API key**: The API key to use with the indexing requests.<br /> 
     It is communicated by the Europa Search team;
- 5. **Ingestion services settings (Indexing requests) > Registered database**: The database id to use with the indexing requests.<br /> 
+ 5. **Ingestion services settings (Indexing requests) > Fallback language in case of Neutral language content**: The code of the language 
+    to use instead of the 'und' (LANGUAGE_NONE) because ES services do not support this value;
+ 6. **Ingestion services settings (Indexing requests) > Registered database**: The database id to use with the indexing requests.<br /> 
     It is communicated by the Europa Search team;
- 6. **Search API services settings (Search requests) > Registered API key**: The API key to use with the search requests.<br /> 
+    **Search API services settings (Search requests) > Europa Search Service URL**: Type the URL where the ES Search services are hosted;
+ 7. **Search API services settings (Search requests) > Proxy settings for accessing the services**: Fields for configuring the proxy to use to connect 
+    the services<br />.
+    If the host system settings are enough, leave the child fields untouched; I.E.:
+    * _Configuration type_ : The type of configuration to use:
+      * "Host system's settings": The module will use the same proxy as the host system uses;
+      * "Specific proxy's settings": The module will use the proxy different than the host system uses;<br />
+        Then, the "Proxy URL" field must be filled.
+      * "Bypass proxy": The module will send requests without passing to any proxy;
+    * _Proxy URL_ : The URL of the specific proxy to use (mandatory if the "Configuration type" value is "Host system's settings");
+    * _Proxy user name_ : The user name to use for the Proxy credentials;
+    * _Proxy password_ : The password to use for the Proxy credentials;
+ 8. **Search API services settings (Search requests) > Registered API key**: The API key to use with the search requests.<br /> 
     It is communicated by the Europa Search team.<br />
     Note that the value can be the same as the indexing one.
- 7. **Search API services settings (Search requests) > Include the database value in search queries**: Indicates if the database id 
- set previously must be used in the search queries sent to the services.
+ 9. **Search API services settings (Search requests) > Include the database value in search queries**: Indicates if the database id 
+    set previously must be used in the search queries sent to the services.
 
  ### Search API index
  
