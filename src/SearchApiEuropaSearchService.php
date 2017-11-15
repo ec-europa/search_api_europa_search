@@ -159,7 +159,7 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
 
     $form['ingestion_settings']['fallback_language'] = array(
       '#type' => 'textfield',
-      '#title' => t('Fallback language in case of Neutral language contentEuropa Search Service url port'),
+      '#title' => t('Fallback language in case of Neutral language content'),
       '#description' => t('The Europa Search REST services does not support "und" language. 
         A fallback language is to be set here for any entity to send for indexing.'),
       '#default_value' => $this->options['ingestion_settings']['fallback_language'],
@@ -302,7 +302,7 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
 
     $form[$proxySettingsKey]['proxy_settings']['user_password'] = array(
       '#type' => 'textfield',
-      '#title' => t('Proxy user name'),
+      '#title' => t('Proxy user password'),
       '#description' => t('The proxy\'s credentials user password. Only taken into account if the configuration type is "Specific proxy\'s settings"'),
       '#default_value' => $proxySettings['user_password'],
     );

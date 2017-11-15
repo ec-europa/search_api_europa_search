@@ -3,8 +3,8 @@
 namespace Drupal\search_api_europa_search\Index;
 
 use Drupal\search_api_europa_search\SearchApiEuropaSearchMetadataBuilder;
-use EC\EuropaSearch\Messages\Index\IndexingWebContent;
-use EC\EuropaSearch\Messages\Index\IndexedItemDeletionMessage;
+use EC\EuropaSearch\Messages\Index\IndexWebContentMessage;
+use EC\EuropaSearch\Messages\Index\DeleteIndexItemMessage;
 use EC\EuropaSearch\EuropaSearch;
 
 /**
@@ -103,11 +103,11 @@ class SearchApiEuropaSearchIndexSender {
    * @param array $indexedItem
    *   The entity data to sent for indexing.
    *
-   * @return \EC\EuropaSearch\Messages\Index\IndexingWebContent
+   * @return \EC\EuropaSearch\Messages\Index\IndexWebContentMessage
    *   The message for a web content indexing.
    */
   protected function buildWebContentMessage(array $indexedItem) {
-    $indexingMessage = new IndexingWebContent();
+    $indexingMessage = new IndexWebContentMessage();
 
     // Set document id.
     $indexingMessage->setDocumentId($indexedItem['search_api_europa_search_reference']['value']['sent_reference']);
@@ -152,7 +152,7 @@ class SearchApiEuropaSearchIndexSender {
    *   The message for a index deletion.
    */
   protected function buildIndexedItemDeletionMessage($referenceToDelete) {
-    $deletionMessage = new IndexedItemDeletionMessage();
+    $deletionMessage = new DeleteIndexItemMessage();
     $deletionMessage->setDocumentId($referenceToDelete);
 
     return $deletionMessage;
