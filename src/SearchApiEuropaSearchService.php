@@ -430,11 +430,16 @@ class SearchApiEuropaSearchService extends \SearchApiAbstractService {
    */
   protected function deleteEntities($entityType, array $entityIds, SearchApiEuropaSearchIndexSender $indexDeleteSender) {
     $entities = entity_load($entityType, $entityIds);
+    $responses = array();
     foreach ($entities as $id => $entity) {
       $language = entity_language($entityType, $entity);
       $referenceToDelete = $this->getEuropaSearchReferenceValue($entityType, $id, $language);
-      $indexDeleteSender->sendDeletionMessage($referenceToDelete);
+      $response = $indexDeleteSender->sendDeletionMessage($referenceToDelete);
+      $responses[] = $response->getReturnedString();
     }
+
+    $list = implode(', ', $responses);
+    watchdog('Search API Europa Search', 'The deleted items references are @list.', array('@list' => $list), WATCHDOG_INFO);
   }
 
 }
