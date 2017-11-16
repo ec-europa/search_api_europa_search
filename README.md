@@ -29,7 +29,7 @@ To do so, it will rely on the [Europa Search Client Library](https://github.com/
 * Search API module;
 * [Europa Search Client Library](https://github.com/ec-europa/oe-europa-search-client);
 * An "class autoload" mechanism allowing Drupal to load classes coming from the composer _"vendor"_ repository.<br />
-  The test environment used in this project uses the contrib module "[Composer Autoload](https://www.drupal.org/project/composer_autoload)"
+  The test environment for this project uses the contrib module "[Composer Autoload](https://www.drupal.org/project/composer_autoload)"
   as mechanism.
 
 ## Limitation
@@ -79,7 +79,7 @@ In order to use this script, please read the next sub-sections.
      - Installing the different libraries the project depends on;
      - Enabling GrumPHP quality control on the Git commits (see the ["Quality control" section](#quality-control));
      - Creating the _"web"_ sub-folder with the code of a Drupal 7 site and the "contrib" modules required by Search API 
-       Europa Search;  
+       Europa Search;
    * Creating symlinks for the module files and the sub-folders in the _"web/sites/all/modules"_ repository;
    * Generating the Drupal 7 site based on the parameters set in the _"scripts/build.properties.local"_ file.<br /><br />
 5. The environment is up and running with a fresh Drupal instance where the module is enabled for the tests (see the ["Tests" section](#tests))
