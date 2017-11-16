@@ -9,12 +9,11 @@ env:
 
 install:
   - composer self-update
-  - composer install
-
 
 script:
-  - grumphp run
   - scripts/setup-dev-env.sh
+  - grumphp run
 
 notifications:
   email: false
+

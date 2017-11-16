@@ -1,0 +1,8 @@
+USER_MAIL=admin@test.com
+USER_NAME=admin
+USER_PASSWORD=admin
+DB_TYPE=mysql
+DB_URL=127.0.0.1
+DB_USER=travis
+DB_PASS=
+DB_NAME=search_api_europa_search
