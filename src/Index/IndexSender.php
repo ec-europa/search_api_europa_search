@@ -2,7 +2,7 @@
 
 namespace Drupal\search_api_europa_search\Index;
 
-use Drupal\search_api_europa_search\SearchApiEuropaSearchMetadataBuilder;
+use Drupal\search_api_europa_search\MetadataBuilder;
 use EC\EuropaSearch\Messages\Index\IndexWebContentMessage;
 use EC\EuropaSearch\Messages\Index\DeleteIndexItemMessage;
 use EC\EuropaSearch\EuropaSearch;
@@ -12,7 +12,7 @@ use EC\EuropaSearch\EuropaSearch;
  *
  * Manages the indexing message coming from the Search API index.
  */
-class SearchApiEuropaSearchIndexSender {
+class IndexSender {
 
   /**
    * The EuropaSearch client factory managing the Europa Search connection.
@@ -180,7 +180,7 @@ class SearchApiEuropaSearchIndexSender {
       $dataValues = array($dataValues);
     }
 
-    $metadataBuilder = new SearchApiEuropaSearchMetadataBuilder($dataName, $dataType, $dataValues);
+    $metadataBuilder = new MetadataBuilder($dataName, $dataType, $dataValues);
 
     return $metadataBuilder->getMetadataObject();
   }

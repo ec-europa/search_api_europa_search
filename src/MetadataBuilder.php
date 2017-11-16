@@ -5,9 +5,9 @@ namespace Drupal\search_api_europa_search;
 use EC\EuropaSearch\Messages\Components\DocumentMetadata\DateMetadata;
 
 /**
- * Class SearchApiEuropaSearchMetadataBuilder.
+ * Class MetadataBuilder.
  */
-class SearchApiEuropaSearchMetadataBuilder {
+class MetadataBuilder {
 
   /**
    * The currently built metadata object.
@@ -17,7 +17,7 @@ class SearchApiEuropaSearchMetadataBuilder {
   private $metadataObject;
 
   /**
-   * SearchApiEuropaSearchMetadataBuilder constructor.
+   * MetadataBuilder constructor.
    *
    * @param string $fieldName
    *   [optional] The name of the field on which the metadata is based.

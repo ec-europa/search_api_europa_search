@@ -3,13 +3,13 @@
 namespace Drupal\search_api_europa_search\Traits;
 
 /**
- * Trait SearchApiEuropaSearchUtil.
+ * Trait UtilsTrait.
  *
  * Proposes methods that can be rused though the module classes.
  *
  * @package Drupal\search_api_europa_search\Traits
  */
-trait SearchApiEuropaSearchUtil {
+trait UtilsTrait {
 
   /**
    * Gets the Europa Search reference.

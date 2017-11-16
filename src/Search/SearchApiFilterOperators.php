@@ -5,9 +5,9 @@ namespace Drupal\search_api_europa_search\Search;
 /**
  * Class SearchApiOperator.
  *
- * Helper class offering mathode to work with Search API filter operator.
+ * Helper class offering method to work with Search API filter operator.
  */
-class SearchApiEuropaSearchOperators {
+class SearchApiFilterOperators {
   const EQUALS_TO = '=';
   const NOT_EQUALS_TO = '<>';
   const GREATER_THAN = '>';
