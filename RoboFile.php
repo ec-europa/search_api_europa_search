@@ -7,7 +7,6 @@ use Robo\Tasks;
  */
 class RoboFile extends Tasks {
 
-  use Boedah\Robo\Task\Drush\loadTasks;
   use NuvoleWeb\Robo\Task\Config\loadTasks;
 
   /**
@@ -92,48 +91,53 @@ class RoboFile extends Tasks {
    */
   public function projectInstall() {
     return $this->collectionBuilder()->addTaskList([
-      $this->getInstallTask()->siteInstall($this->config('site.profile')),
-      $this->getDrush()->drush('en ' . implode(' ', $this->config('modules.enable'))),
-      $this->getDrush()->drush('dis ' . implode(' ', $this->config('modules.disable'))),
+      $this->getInstallTask()->arg($this->config('site.profile')),
+      $this->getDrush()->arg('en')->args($this->config('modules.enable')),
+      $this->getDrush()->arg('dis')->args($this->config('modules.disable')),
     ]);
   }
 
   /**
    * Get installation task.
    *
-   * @return \Boedah\Robo\Task\Drush\DrushStack
+   * @return \Robo\Task\Base\Exec
    *   Drush installation task.
    */
   protected function getInstallTask() {
     return $this->getDrush()
-      ->siteName($this->config('site.name'))
-      ->siteMail($this->config('site.mail'))
-      ->locale($this->config('site.locale'))
-      ->accountMail($this->config('account.mail'))
-      ->accountName($this->config('account.name'))
-      ->accountPass($this->config('account.password'))
-      ->dbPrefix($this->config('database.prefix'))
-      ->dbUrl(sprintf("mysql://%s:%s@%s:%s/%s",
-        $this->config('database.user'),
-        $this->config('database.password'),
-        $this->config('database.host'),
-        $this->config('database.port'),
-        $this->config('database.name')));
+      ->options([
+        'site-name' => $this->config('site.name'),
+        'site-mail' => $this->config('site.mail'),
+        'locale' => $this->config('site.locale'),
+        'account-mail' => $this->config('account.mail'),
+        'account-name' => $this->config('account.name'),
+        'account-pass' => $this->config('account.password'),
+        'db-prefix' => $this->config('database.prefix'),
+        'exclude' => $this->config('site.root'),
+        'db-url' => sprintf("mysql://%s:%s@%s:%s/%s",
+          $this->config('database.user'),
+          $this->config('database.password'),
+          $this->config('database.host'),
+          $this->config('database.port'),
+          $this->config('database.name')),
+      ], '=')
+      ->arg('site-install');
   }
 
   /**
    * Get configured Drush task.
    *
-   * @return \Boedah\Robo\Task\Drush\DrushStack
-   *   Drush installation task.
+   * @return \Robo\Task\Base\Exec
+   *   Exec command.
    */
   protected function getDrush() {
-    return $this->taskDrushStack($this->config('bin.drush'))
-      ->drupalRootDirectory($this->getSiteRoot());
+    return $this->taskExec($this->config('bin.drush'))
+      ->option('-y')
+      ->option('root', $this->getSiteRoot(), '=');
   }
 
   /**
-   * Get getProjectRoot directory.
+   * Get root directory.
    *
    * @return string
    *   Root directory.
@@ -143,7 +147,7 @@ class RoboFile extends Tasks {
   }
 
   /**
-   * Get getProjectRoot directory.
+   * Get site root directory.
    *
    * @return string
    *   Root directory.
