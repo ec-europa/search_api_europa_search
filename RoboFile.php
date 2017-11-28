@@ -21,6 +21,7 @@ class RoboFile extends Tasks {
     $collection = $this->collectionBuilder()->addTaskList([
       $this->taskFilesystemStack()->chmod($this->getSiteRoot() . '/sites', 0775, 0000, TRUE),
       $this->taskFilesystemStack()->symlink($this->getProjectRoot(), $this->getSiteRoot() . '/sites/all/modules/' . $this->getProjectName()),
+      $this->taskWriteConfiguration($this->getSiteRoot() . '/sites/default/drushrc.php')->setConfigKey('drush'),
       $this->taskAppendConfiguration($this->getSiteRoot() . '/sites/default/default.settings.php')->setConfigKey('settings'),
     ]);
 
@@ -114,6 +115,7 @@ class RoboFile extends Tasks {
         'account-name' => $this->config('account.name'),
         'account-pass' => $this->config('account.password'),
         'db-prefix' => $this->config('database.prefix'),
+        'exclude' => $this->config('site.root'),
         'db-url' => sprintf("mysql://%s:%s@%s:%s/%s",
           $this->config('database.user'),
           $this->config('database.password'),
