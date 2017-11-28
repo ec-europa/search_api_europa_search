@@ -28,7 +28,7 @@ class MetadataBuilder {
    * @param array $metadataValues
    *   [optional] Array of values to set.
    *
-   * @throws Exception
+   * @throws \Exception
    *   Raised if the entity data type is not supported by the message class.
    */
   public function __construct($fieldName = '', $fieldType = 'string', array $metadataValues = array()) {

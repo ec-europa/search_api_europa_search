@@ -37,21 +37,11 @@ class RoboFile extends Tasks {
    * @aliases pi
    */
   public function projectInstall() {
-    $this->getInstallTask()
-      ->siteInstall($this->config('site.profile'))
-      ->run();
-
-    $modules_list = implode(' ', $this->config('modules.enable'));
-    $this->taskDrushStack($this->config('bin.drush'))
-      ->drupalRootDirectory($this->root() . '/build')
-      ->drush('en ' . $modules_list)
-      ->run();
-
-    $modules_list = implode(' ', $this->config('modules.disable'));
-    $this->taskDrushStack($this->config('bin.drush'))
-      ->drupalRootDirectory($this->root() . '/build')
-      ->drush('dis ' . $modules_list)
-      ->run();
+    return $this->collectionBuilder()->addTaskList([
+      $this->getInstallTask()->siteInstall($this->config('site.profile')),
+      $this->getDrush()->drush('en ' . implode(' ', $this->config('modules.enable'))),
+      $this->getDrush()->drush('dis ' . implode(' ', $this->config('modules.disable'))),
+    ]);
   }
 
   /**
@@ -61,8 +51,7 @@ class RoboFile extends Tasks {
    *   Drush installation task.
    */
   protected function getInstallTask() {
-    return $this->taskDrushStack($this->config('bin.drush'))
-      ->arg("--root={$this->root()}/build")
+    return $this->getDrush()
       ->siteName($this->config('site.name'))
       ->siteMail($this->config('site.mail'))
       ->locale($this->config('site.locale'))
@@ -76,6 +65,17 @@ class RoboFile extends Tasks {
         $this->config('database.host'),
         $this->config('database.port'),
         $this->config('database.name')));
+  }
+
+  /**
+   * Get configured Drush task.
+   *
+   * @return \Boedah\Robo\Task\Drush\DrushStack
+   *   Drush installation task.
+   */
+  protected function getDrush() {
+    return $this->taskDrushStack($this->config('bin.drush'))
+      ->drupalRootDirectory($this->root() . '/build');
   }
 
   /**

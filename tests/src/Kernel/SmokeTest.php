@@ -15,7 +15,7 @@ class SmokeTest extends TestCase {
    * Smoke test.
    */
   public function testSmoke() {
-    $this->assertTrue(TRUE);
+    $this->assertTrue(module_exists('search_api_europa_search'));
   }
 
 }
