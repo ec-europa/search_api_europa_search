@@ -31,11 +31,6 @@ database:
   password: ''
   prefix: ''
 
-# Drush configuration
-drush:
-  options:
-    exclude: build
-
 # Drupal configuration
 settings:
   conf:

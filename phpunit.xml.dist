@@ -22,8 +22,8 @@
         <ini name="error_reporting" value="32767"/>
         <!-- Do not limit the amount of memory tests take to run. -->
         <ini name="memory_limit" value="-1"/>
-        <const name="DRUPAL_ROOT" value="%DRUPAL_ROOT%"/>
-        <const  name="BASE_URL" value="%BASE_URL%"/>
+        <const name="DRUPAL_ROOT" value="!site.root"/>
+        <const  name="BASE_URL" value="!site.base_url"/>
         <server name="REMOTE_ADDR" value="localhost"/>
     </php>
 </phpunit>

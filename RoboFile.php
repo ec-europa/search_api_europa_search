@@ -21,7 +21,6 @@ class RoboFile extends Tasks {
     $collection = $this->collectionBuilder()->addTaskList([
       $this->taskFilesystemStack()->chmod($this->getSiteRoot() . '/sites', 0775, 0000, TRUE),
       $this->taskFilesystemStack()->symlink($this->getProjectRoot(), $this->getSiteRoot() . '/sites/all/modules/' . $this->getProjectName()),
-      $this->taskWriteConfiguration($this->getSiteRoot() . '/sites/default/drushrc.php')->setConfigKey('drush'),
       $this->taskAppendConfiguration($this->getSiteRoot() . '/sites/default/default.settings.php')->setConfigKey('settings'),
     ]);
 
@@ -40,8 +39,14 @@ class RoboFile extends Tasks {
    * Setup PHPUnit.
    *
    * This command will copy phpunit.xml.dist in phpunit.xml and replace
-   * %DRUPAL_ROOT% and %BASE_URL% with configuration values provided in
-   * robo.yml.dist (overridable by robo.yml).
+   * configuration tokens with values provided in robo.yml.dist / robo.yml.
+   *
+   * For example, given the following configuration:
+   *
+   * > site:
+   * >   root: build
+   *
+   * Then its token format would be: !site.root
    *
    * @command project:setup-phpunit
    * @aliases psp
@@ -50,20 +55,21 @@ class RoboFile extends Tasks {
    *   Collection builder.
    */
   public function projectSetupPhpUnit() {
-    return $this->collectionBuilder()->addTaskList([
-      $this->taskFilesystemStack()->copy('phpunit.xml.dist', 'phpunit.xml'),
-      $this->taskReplaceInFile('phpunit.xml')
-        ->from(['%DRUPAL_ROOT%', '%BASE_URL%'])
-        ->to([$this->getSiteRoot(), $this->config('site.base_url')]),
-    ]);
+    return $this->getReplaceConfigurationTokensTasks('phpunit.xml.dist', 'phpunit.xml');
   }
 
   /**
    * Setup Behat.
    *
-   * This command will copy behat.yml.dist in behat.yml and replace
-   * %DRUPAL_ROOT% and %BASE_URL% with configuration values provided in
-   * robo.yml.dist (overridable by robo.yml).
+   * This command will copy phpunit.xml.dist in phpunit.xml and replace
+   * configuration tokens with values provided in robo.yml.dist / robo.yml.
+   *
+   * For example, given the following configuration:
+   *
+   * > site:
+   * >   root: build
+   *
+   * Then its token format would be: !site.root
    *
    * @command project:setup-behat
    * @aliases psb
@@ -72,12 +78,7 @@ class RoboFile extends Tasks {
    *   Collection builder.
    */
   public function projectSetupBehat() {
-    return $this->collectionBuilder()->addTaskList([
-      $this->taskFilesystemStack()->copy('behat.yml.dist', 'behat.yml'),
-      $this->taskReplaceInFile('behat.yml')
-        ->from(['%DRUPAL_ROOT%', '%BASE_URL%'])
-        ->to([$this->getSiteRoot(), $this->config('site.base_url')]),
-    ]);
+    return $this->getReplaceConfigurationTokensTasks('behat.yml.dist', 'behat.yml');
   }
 
   /**
@@ -113,7 +114,6 @@ class RoboFile extends Tasks {
         'account-name' => $this->config('account.name'),
         'account-pass' => $this->config('account.password'),
         'db-prefix' => $this->config('database.prefix'),
-        'exclude' => $this->config('site.root'),
         'db-url' => sprintf("mysql://%s:%s@%s:%s/%s",
           $this->config('database.user'),
           $this->config('database.password'),
@@ -166,6 +166,61 @@ class RoboFile extends Tasks {
     $package = json_decode(file_get_contents('./composer.json'));
     list(, $name) = explode('/', $package->name);
     return $name;
+  }
+
+  /**
+   * Replace configuration tokens in files.
+   *
+   * @param string $source
+   *   Source file.
+   * @param string $destination
+   *   Destination file.
+   *
+   * @return \Robo\Collection\CollectionBuilder
+   *   Collection builder.
+   */
+  protected function getReplaceConfigurationTokensTasks($source, $destination) {
+    $tokens = $this->parseTokens($source);
+    $configuration = $this->getConfigurationFromTokens($tokens);
+    return $this->collectionBuilder()->addTaskList([
+      $this->taskFilesystemStack()->copy($source, $destination, TRUE),
+      $this->taskReplaceInFile($destination)->from('!site.root')->to($this->getSiteRoot()),
+      $this->taskReplaceInFile($destination)->from($tokens)->to($configuration),
+    ]);
+  }
+
+  /**
+   * Parse a file and extract its tokens.
+   *
+   * @param string $file
+   *   Path to file.
+   *
+   * @return array
+   *   List of tokens.
+   */
+  protected function parseTokens($file) {
+    preg_match_all('/!((\w+\.?)+)/', file_get_contents($file), $matches);
+    if (isset($matches[0]) && !empty($matches[0]) && is_array($matches[0])) {
+      return $matches[0];
+    }
+
+    return [];
+  }
+
+  /**
+   * Get configuration values from tokens.
+   *
+   * @param array $tokens
+   *   Token list.
+   *
+   * @return array
+   *   Configuration values.
+   */
+  protected function getConfigurationFromTokens(array $tokens) {
+    foreach ($tokens as $key => $token) {
+      $tokens[$key] = $this->config(ltrim($token, '!'));
+    }
+    return $tokens;
   }
 
 }
