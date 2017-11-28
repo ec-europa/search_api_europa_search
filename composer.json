@@ -6,7 +6,7 @@
   "prefer-stable": true,
   "license": "EUPL-1.1",
   "require": {
-    "ec-europa/oe-europa-search-client": "dev-nept-1558-issue17"
+    "ec-europa/oe-europa-search-client": "dev-master"
   },
   "require-dev": {
     "ec-europa/oe-code-review": "^0.0.2",
@@ -37,6 +37,9 @@
     "psr-4": {
       "Drupal\\Tests\\search_api_europa_search\\": "tests/src"
     }
+  },
+  "scripts": {
+    "post-install-cmd": "./vendor/bin/robo project:setup"
   },
   "extra": {
     "patches": {

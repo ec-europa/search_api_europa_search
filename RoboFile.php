@@ -17,17 +17,58 @@ class RoboFile extends Tasks {
    * @aliases pi
    */
   public function projectSetup() {
-    $collection = [];
-    $collection[] = $this->taskFilesystemStack()->chmod('build/sites', 0775, 0000, TRUE);
-    $collection[] = $this->taskFilesystemStack()->symlink($this->root(), $this->root() . '/build/sites/all/modules/' . $this->getProjectName());
-    $collection[] = $this->taskWriteConfiguration('build/sites/default/drushrc.php')->setConfigKey('drush');
-    $collection[] = $this->taskAppendConfiguration('build/sites/default/default.settings.php')->setConfigKey('settings');
-    if (file_exists('phpunit.xml.dist')) {
-      $collection[] = $this->taskFilesystemStack()->copy('phpunit.xml.dist', 'phpunit.xml');
-      $collection[] = $this->taskReplaceInFile('phpunit.xml')->from('%DRUPAL_ROOT%')->to($this->root() . '/build');
+    $collection = $this->collectionBuilder()->addTaskList([
+      $this->taskFilesystemStack()->chmod('build/sites', 0775, 0000, TRUE),
+      $this->taskFilesystemStack()->symlink($this->getProjectRoot(), $this->getSiteRoot() . '/sites/all/modules/' . $this->getProjectName()),
+      $this->taskWriteConfiguration('build/sites/default/drushrc.php')->setConfigKey('drush'),
+      $this->taskAppendConfiguration('build/sites/default/default.settings.php')->setConfigKey('settings'),
+    ]);
+
+    if (file_exists('behat.yml.dist')) {
+      $collection->addTask($this->projectSetupBehat());
     }
 
-    return $this->collectionBuilder()->addTaskList($collection);
+    if (file_exists('phpunit.xml.dist')) {
+      $collection->addTask($this->projectSetupPhpUnit());
+    }
+
+    return $collection;
+  }
+
+  /**
+   * Setup Behat.
+   *
+   * @command project:setup-phpunit
+   * @aliases psb
+   *
+   * @return \Robo\Collection\CollectionBuilder
+   *   Collection builder.
+   */
+  public function projectSetupPhpUnit() {
+    return $this->collectionBuilder()->addTaskList([
+      $this->taskFilesystemStack()->copy('phpunit.xml.dist', 'phpunit.xml'),
+      $this->taskReplaceInFile('phpunit.xml')
+        ->from(['%DRUPAL_ROOT%', '%BASE_URL%'])
+        ->to([$this->getSiteRoot(), $this->config('site.base_url')]),
+    ]);
+  }
+
+  /**
+   * Setup Behat.
+   *
+   * @command project:setup-behat
+   * @aliases psb
+   *
+   * @return \Robo\Collection\CollectionBuilder
+   *   Collection builder.
+   */
+  public function projectSetupBehat() {
+    return $this->collectionBuilder()->addTaskList([
+      $this->taskFilesystemStack()->copy('behat.yml.dist', 'behat.yml'),
+      $this->taskReplaceInFile('behat.yml')
+        ->from(['%DRUPAL_ROOT%', '%BASE_URL%'])
+        ->to([$this->getSiteRoot(), $this->config('site.base_url')]),
+    ]);
   }
 
   /**
@@ -75,17 +116,27 @@ class RoboFile extends Tasks {
    */
   protected function getDrush() {
     return $this->taskDrushStack($this->config('bin.drush'))
-      ->drupalRootDirectory($this->root() . '/build');
+      ->drupalRootDirectory($this->getSiteRoot());
   }
 
   /**
-   * Get root directory.
+   * Get getProjectRoot directory.
    *
    * @return string
    *   Root directory.
    */
-  protected function root() {
+  protected function getProjectRoot() {
     return getcwd();
+  }
+
+  /**
+   * Get getProjectRoot directory.
+   *
+   * @return string
+   *   Root directory.
+   */
+  protected function getSiteRoot() {
+    return $this->getProjectRoot() . '/' . $this->config('site.root');
   }
 
   /**

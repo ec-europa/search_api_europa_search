@@ -23,7 +23,7 @@
         <!-- Do not limit the amount of memory tests take to run. -->
         <ini name="memory_limit" value="-1"/>
         <const name="DRUPAL_ROOT" value="%DRUPAL_ROOT%"/>
-        <const  name="BASE_URL" value="http://localhost"/>
+        <const  name="BASE_URL" value="%BASE_URL%"/>
         <server name="REMOTE_ADDR" value="localhost"/>
     </php>
 </phpunit>

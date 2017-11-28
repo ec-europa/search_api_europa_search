@@ -47,15 +47,21 @@ Run:
 $ composer install
 ```
 
-This will download all development dependencies and build a Drupal 7 target site under `./build`.
+This will download all development dependencies and build a Drupal 7 target site under `./build` and run
+`./vendor/bin/robo project:setup` to setup proper symlink and produce necessary scaffolding files.
 
 After that:
 
 1. Copy `robo.yml.dist` into `robo.yml` and customise relevant parameters.
-2. Run `./vendor/bin/robo project:setup` to setup proper symlink and produce necessary scaffolding files.
-3. Run `./vendor/bin/robo project:install` to install the project having the Search API Europa Search module enabled.
+2. Run `./vendor/bin/robo project:install` to install the project having the Search API Europa Search module enabled.
 
 The project uses the target site for tests, see the ["Tests" section](#tests) for more information.
+
+To have a complete list of building options run:
+
+```
+$ ./vendor/bin/robo
+```
 
 #### Quality control
 
