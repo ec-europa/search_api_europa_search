@@ -2,14 +2,14 @@
 
 namespace Drupal\search_api_europa_search;
 
-use Drupal\search_api_europa_search\Traits\SearchApiEuropaSearchUtil;
+use Drupal\search_api_europa_search\Traits\UtilsTrait;
 
 /**
  * Search API data alteration callback that adds an reference for all items.
  */
-class SearchApiEuropaSearchAlterAddReference extends \SearchApiAbstractAlterCallback {
+class EuropaSearchReferenceDataAlterator extends \SearchApiAbstractAlterCallback {
 
-  use SearchApiEuropaSearchUtil;
+  use UtilsTrait;
 
   /**
    * {@inheritdoc}

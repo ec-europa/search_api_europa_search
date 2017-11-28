@@ -2,7 +2,7 @@
 
 namespace Drupal\search_api_europa_search\Search;
 
-use Drupal\search_api_europa_search\SearchApiEuropaSearchMetadataBuilder;
+use Drupal\search_api_europa_search\MetadataBuilder;
 use EC\EuropaSearch\Messages\Components\Filters\Queries\BooleanQuery;
 use EC\EuropaSearch\Messages\Components\Filters\BoostableFilter;
 use EC\EuropaSearch\Messages\Components\Filters\Clauses\FieldExistsClause;
@@ -12,11 +12,11 @@ use EC\EuropaSearch\Messages\Components\DocumentMetadata\AbstractMetadata;
 use EC\EuropaSearch\Messages\Components\Filters\Clauses\RangeClause;
 
 /**
- * Class SearchApiEuropaSearchQueryBuilder.
+ * Class SearchQueryBuilder.
  *
  * Builds Europa Search Query based on a Search API one.
  */
-class SearchApiEuropaSearchQueryBuilder {
+class SearchQueryBuilder {
 
   private $indexedFields;
 
@@ -27,7 +27,7 @@ class SearchApiEuropaSearchQueryBuilder {
   private $metadataBuilder;
 
   /**
-   * SearchApiEuropaSearchQueryBuilder constructor.
+   * SearchQueryBuilder constructor.
    *
    * @param \SearchApiQueryInterface $searchApiQuery
    *   The query supplied by Search API.
@@ -38,7 +38,7 @@ class SearchApiEuropaSearchQueryBuilder {
     $this->indexedFields = $indexedFields;
     $this->searchApiQuery = $searchApiQuery;
     $this->europaSearchQuery = new BooleanQuery();
-    $this->metadataBuilder = new SearchApiEuropaSearchMetadataBuilder();
+    $this->metadataBuilder = new MetadataBuilder();
 
     // Builds the Europa Search query.
     $filter = $this->searchApiQuery->getFilter();
@@ -111,7 +111,7 @@ class SearchApiEuropaSearchQueryBuilder {
       return;
     }
 
-    if (!SearchApiEuropaSearchOperators::isSearchApiOperator($operator)) {
+    if (!SearchApiFilterOperators::isSearchApiOperator($operator)) {
       $fieldName = $normalizedClause['field_name'];
       throw new Exception(t('Undefined filter clause operator :operator for :field_name field!',
         array(':operator' => $normalizedClause['filter_operator'], ':field_name' => $fieldName)));
@@ -122,7 +122,7 @@ class SearchApiEuropaSearchQueryBuilder {
     $methodName = $this->getEuropaSearchConjunctionClauseMethod($conjunction, $normalizedClause['field_name']);
     $operator = $normalizedClause['filter_operator'];
 
-    if (SearchApiEuropaSearchOperators::NOT_EQUALS_TO == $operator) {
+    if (SearchApiFilterOperators::NOT_EQUALS_TO == $operator) {
       $clause = $this->getEuropaSearchEqualsClause($impliedMetadata, $clauseValue);
       $clause->setBoost($normalizedClause['filter_boost']);
       $parentQuery->addMustNotFilterClause($clause);
@@ -130,7 +130,7 @@ class SearchApiEuropaSearchQueryBuilder {
       return;
     }
 
-    if (SearchApiEuropaSearchOperators::EQUALS_TO == $operator) {
+    if (SearchApiFilterOperators::EQUALS_TO == $operator) {
       $clause = $this->getEuropaSearchEqualsClause($impliedMetadata, $clauseValue);
     }
 
@@ -159,19 +159,19 @@ class SearchApiEuropaSearchQueryBuilder {
     $clause = new RangeClause($impliedMetadata);
 
     switch ($operator) {
-      case SearchApiEuropaSearchOperators::LESS_THAN:
+      case SearchApiFilterOperators::LESS_THAN:
         $clause->setLowerBoundaryExcluded($clauseValue);
         break;
 
-      case SearchApiEuropaSearchOperators::LESS_EQUALS_TO:
+      case SearchApiFilterOperators::LESS_EQUALS_TO:
         $clause->setLowerBoundaryIncluded($clauseValue);
         break;
 
-      case SearchApiEuropaSearchOperators::GREATER_THAN:
+      case SearchApiFilterOperators::GREATER_THAN:
         $clause->setUpperBoundaryExcluded($clauseValue);
         break;
 
-      case SearchApiEuropaSearchOperators::GREATER_EQUALS_TO:
+      case SearchApiFilterOperators::GREATER_EQUALS_TO:
         $clause->setUpperBoundaryIncluded($clauseValue);
         break;
     }
@@ -218,7 +218,7 @@ class SearchApiEuropaSearchQueryBuilder {
   protected function setEuropaSearchFieldExistClause(array $normalizedClause, $conjunction, BoostableFilter $parentQuery) {
     $clause = new FieldExistsClause($normalizedClause['filter_metadata']);
 
-    if (SearchApiEuropaSearchOperators::IS_EMPTY == $normalizedClause['filter_operator']) {
+    if (SearchApiFilterOperators::IS_EMPTY == $normalizedClause['filter_operator']) {
       // A search api clause "is empty" is the equivalent of "must_not" query
       // with "FilterExist" clause.
       $parentQuery->addMustNotFilterClause($clause);
@@ -290,7 +290,7 @@ class SearchApiEuropaSearchQueryBuilder {
 
     $indexInfo = $index_fields[$fieldName];
     $dataType = $indexInfo['type'];
-    $filterOperator = str_replace('!=', SearchApiEuropaSearchOperators::NOT_EQUALS_TO, $filterOperator);
+    $filterOperator = str_replace('!=', SearchApiFilterOperators::NOT_EQUALS_TO, $filterOperator);
     $relatedMetaData = $this->metadataBuilder->convertField($fieldName, $dataType);
 
     $normalizedFilter = array(
@@ -301,16 +301,16 @@ class SearchApiEuropaSearchQueryBuilder {
       'filter_metadata' => $relatedMetaData,
     );
 
-    if (SearchApiEuropaSearchOperators::isExistsOperator($filterOperator)) {
+    if (SearchApiFilterOperators::isExistsOperator($filterOperator)) {
       // If the operator tests if the field exists, no need to add the value to
       // the returned array then.
       return $normalizedFilter;
     }
 
     if (is_null($fieldValue)) {
-      $normalizedFilter['filter_operator'] = SearchApiEuropaSearchOperators::IS_EMPTY;
-      if (SearchApiEuropaSearchOperators::NOT_EQUALS_TO) {
-        $normalizedFilter['filter_operator'] = SearchApiEuropaSearchOperators::IS_NOT_EMPTY;
+      $normalizedFilter['filter_operator'] = SearchApiFilterOperators::IS_EMPTY;
+      if (SearchApiFilterOperators::NOT_EQUALS_TO) {
+        $normalizedFilter['filter_operator'] = SearchApiFilterOperators::IS_NOT_EMPTY;
       }
 
       // If the value is null, then we tests if the field is set or not, no

@@ -26,7 +26,6 @@
     "nuvoleweb/robo-config": "~0.1",
     "boedah/robo-drush": "~3",
     "drupal/drupal-extension": "~3.0"
-
   },
   "repositories": [
     {

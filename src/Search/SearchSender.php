@@ -2,16 +2,16 @@
 
 namespace Drupal\search_api_europa_search\Search;
 
-use Drupal\search_api_europa_search\SearchApiEuropaSearchMetadataBuilder;
+use Drupal\search_api_europa_search\MetadataBuilder;
 use EC\EuropaSearch\Messages\Search\SearchMessage;
 use EC\EuropaSearch\EuropaSearch;
 
 /**
- * Class SearchApiEuropaSearchSearchSender.
+ * Class SearchSender.
  *
  * Manages the search message coming from the Search API index.
  */
-class SearchApiEuropaSearchSearchSender {
+class SearchSender {
 
   /**
    * The message to build and to send through the client.
@@ -28,7 +28,7 @@ class SearchApiEuropaSearchSearchSender {
   protected $clientFactory;
 
   /**
-   * SearchApiEuropaSearchSearchSender constructor.
+   * SearchSender constructor.
    *
    * @param \EC\EuropaSearch\EuropaSearch $clientFactory
    *   The client factory used for the message sending.
@@ -160,7 +160,7 @@ class SearchApiEuropaSearchSearchSender {
    *   The fields that are indexed in Search API.
    */
   protected function buildEuropaSearchQuery(\SearchApiQueryInterface $searchApiQuery, array $indexedFields) {
-    $builder = new SearchApiEuropaSearchQueryBuilder($searchApiQuery, $indexedFields);
+    $builder = new SearchQueryBuilder($searchApiQuery, $indexedFields);
     $query = $builder->getQuery();
     $this->searchMessage->setQuery($query);
   }
@@ -179,7 +179,7 @@ class SearchApiEuropaSearchSearchSender {
 
     if (('search_api_relevance' != $sortField) && (isset($indexedFields[$sortField]))) {
       $fieldDefinition = $indexedFields[$sortField];
-      $metadataBuilder = new SearchApiEuropaSearchMetadataBuilder($sortField, $fieldDefinition['type']);
+      $metadataBuilder = new MetadataBuilder($sortField, $fieldDefinition['type']);
       $sortDirection = $sortDefinitions[$sortField];
       $this->searchMessage->setSortCriteria($metadataBuilder->getMetadataObject(), $sortDirection);
     }

@@ -10,7 +10,7 @@ namespace Drupal\search_api_europa_search;
  *   Europa Search services.
  * - Applying a text format on any strings.
  */
-class SearchApiEuropaSearchProcessor extends \SearchApiAbstractProcessor {
+class EuropaSearchProcessor extends \SearchApiAbstractProcessor {
 
   /**
    * {@inheritdoc}

@@ -6,11 +6,11 @@ use EC\EuropaSearch\Messages\Search\SearchResponse;
 use EC\EuropaSearch\Messages\Search\SearchResult;
 
 /**
- * Class SearchApiEuropaSearchSearchResponseParser.
+ * Class SearchResponseParser.
  *
  * Parses search responses coming from the Eruopa Search services client.
  */
-class SearchApiEuropaSearchSearchResponseParser {
+class SearchResponseParser {
 
   /**
    * The Search API index related to the Search related responses objects.
@@ -20,7 +20,7 @@ class SearchApiEuropaSearchSearchResponseParser {
   private $searchApiQuery;
 
   /**
-   * SearchApiEuropaSearchSearchResponseParser constructor.
+   * SearchResponseParser constructor.
    *
    * @param \SearchApiQueryInterface $query
    *   The Search Api query related to the responses to treat.

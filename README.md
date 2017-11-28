@@ -29,7 +29,7 @@ To do so, it will rely on the [Europa Search Client Library](https://github.com/
 * Search API module;
 * [Europa Search Client Library](https://github.com/ec-europa/oe-europa-search-client);
 * An "class autoload" mechanism allowing Drupal to load classes coming from the composer _"vendor"_ repository.<br />
-  The test environment used in this project uses the contrib module "[Composer Autoload](https://www.drupal.org/project/composer_autoload)"
+* The test environment for this project uses the contrib module "[Composer Autoload](https://www.drupal.org/project/composer_autoload)"
   as mechanism.
 
 ## Limitation
