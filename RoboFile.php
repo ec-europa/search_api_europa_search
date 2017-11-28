@@ -17,16 +17,17 @@ class RoboFile extends Tasks {
    * @aliases pi
    */
   public function projectSetup() {
-    $this->taskFilesystemStack()
-      ->chmod('build/sites', 0775, 0000, TRUE)
-      ->run();
-    $this->_symlink($this->root(), $this->root() . '/build/sites/all/modules/' . $this->getProjectName());
-    $this->taskWriteConfiguration('build/sites/default/drushrc.php')
-      ->setConfigKey('drush')
-      ->run();
-    $this->taskAppendConfiguration('build/sites/default/default.settings.php')
-      ->setConfigKey('settings')
-      ->run();
+    $collection = [];
+    $collection[] = $this->taskFilesystemStack()->chmod('build/sites', 0775, 0000, TRUE);
+    $collection[] = $this->taskFilesystemStack()->symlink($this->root(), $this->root() . '/build/sites/all/modules/' . $this->getProjectName());
+    $collection[] = $this->taskWriteConfiguration('build/sites/default/drushrc.php')->setConfigKey('drush');
+    $collection[] = $this->taskAppendConfiguration('build/sites/default/default.settings.php')->setConfigKey('settings');
+    if (file_exists('phpunit.xml.dist')) {
+      $collection[] = $this->taskFilesystemStack()->copy('phpunit.xml.dist', 'phpunit.xml');
+      $collection[] = $this->taskReplaceInFile('phpunit.xml')->from('%DRUPAL_ROOT%')->to($this->root() . '/build');
+    }
+
+    return $this->collectionBuilder()->addTaskList($collection);
   }
 
   /**

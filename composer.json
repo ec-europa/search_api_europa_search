@@ -33,6 +33,11 @@
       "url": "https://packages.drupal.org/7"
     }
   ],
+  "autoload": {
+    "psr-4": {
+      "Drupal\\Tests\\search_api_europa_search\\": "tests/src"
+    }
+  },
   "extra": {
     "patches": {
       "drupal/drupal": {
