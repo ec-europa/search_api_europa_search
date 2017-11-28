@@ -20,10 +20,10 @@ class RoboFile extends Tasks {
    */
   public function projectSetup() {
     $collection = $this->collectionBuilder()->addTaskList([
-      $this->taskFilesystemStack()->chmod($this->getSiteRoot() . 'sites', 0775, 0000, TRUE),
+      $this->taskFilesystemStack()->chmod($this->getSiteRoot() . '/sites', 0775, 0000, TRUE),
       $this->taskFilesystemStack()->symlink($this->getProjectRoot(), $this->getSiteRoot() . '/sites/all/modules/' . $this->getProjectName()),
-      $this->taskWriteConfiguration($this->getSiteRoot() . 'sites/default/drushrc.php')->setConfigKey('drush'),
-      $this->taskAppendConfiguration($this->getSiteRoot() . 'sites/default/default.settings.php')->setConfigKey('settings'),
+      $this->taskWriteConfiguration($this->getSiteRoot() . '/sites/default/drushrc.php')->setConfigKey('drush'),
+      $this->taskAppendConfiguration($this->getSiteRoot() . '/sites/default/default.settings.php')->setConfigKey('settings'),
     ]);
 
     if (file_exists('behat.yml.dist')) {
