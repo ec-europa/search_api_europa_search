@@ -1,4 +1,6 @@
-vendor/
-web/
+/build/
+/vendor/
 composer.lock
 scripts/build.properties.local
+robo.yml
+behat.yml
