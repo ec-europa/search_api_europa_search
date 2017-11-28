@@ -39,7 +39,7 @@
     }
   },
   "scripts": {
-    "post-update-cmd": "./vendor/bin/robo project:setup"
+    "post-update-cmd": "./vendor/bin/robo project:setup",
     "post-install-cmd": "./vendor/bin/robo project:setup"
   },
   "extra": {
