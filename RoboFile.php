@@ -11,17 +11,19 @@ class RoboFile extends Tasks {
   use NuvoleWeb\Robo\Task\Config\loadTasks;
 
   /**
-   * Install site.
+   * Setup project.
+   *
+   * This command will create the necessary symlinks and scaffolding files.
    *
    * @command project:setup
-   * @aliases pi
+   * @aliases ps
    */
   public function projectSetup() {
     $collection = $this->collectionBuilder()->addTaskList([
-      $this->taskFilesystemStack()->chmod('build/sites', 0775, 0000, TRUE),
+      $this->taskFilesystemStack()->chmod($this->getSiteRoot() . 'sites', 0775, 0000, TRUE),
       $this->taskFilesystemStack()->symlink($this->getProjectRoot(), $this->getSiteRoot() . '/sites/all/modules/' . $this->getProjectName()),
-      $this->taskWriteConfiguration('build/sites/default/drushrc.php')->setConfigKey('drush'),
-      $this->taskAppendConfiguration('build/sites/default/default.settings.php')->setConfigKey('settings'),
+      $this->taskWriteConfiguration($this->getSiteRoot() . 'sites/default/drushrc.php')->setConfigKey('drush'),
+      $this->taskAppendConfiguration($this->getSiteRoot() . 'sites/default/default.settings.php')->setConfigKey('settings'),
     ]);
 
     if (file_exists('behat.yml.dist')) {
@@ -36,10 +38,14 @@ class RoboFile extends Tasks {
   }
 
   /**
-   * Setup Behat.
+   * Setup PHPUnit.
+   *
+   * This command will copy phpunit.xml.dist in phpunit.xml and replace
+   * %DRUPAL_ROOT% and %BASE_URL% with configuration values provided in
+   * robo.yml.dist (overridable by robo.yml).
    *
    * @command project:setup-phpunit
-   * @aliases psb
+   * @aliases psp
    *
    * @return \Robo\Collection\CollectionBuilder
    *   Collection builder.
@@ -55,6 +61,10 @@ class RoboFile extends Tasks {
 
   /**
    * Setup Behat.
+   *
+   * This command will copy behat.yml.dist in behat.yml and replace
+   * %DRUPAL_ROOT% and %BASE_URL% with configuration values provided in
+   * robo.yml.dist (overridable by robo.yml).
    *
    * @command project:setup-behat
    * @aliases psb
@@ -72,7 +82,10 @@ class RoboFile extends Tasks {
   }
 
   /**
-   * Install site.
+   * Install target site.
+   *
+   * This command will install the target site using configuration values
+   * provided in robo.yml.dist (overridable by robo.yml).
    *
    * @command project:install
    * @aliases pi
