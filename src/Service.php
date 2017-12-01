@@ -65,7 +65,12 @@ class Service extends \SearchApiAbstractService {
     $this->initEuropaSearchClient();
 
     if (is_string($ids) && ('all' == $ids)) {
-      throw new \Exception('Unsupported action, a full index deletion is not supported yet by the Search API Europa Search module.');
+      $message = t('The Drupal Search API tables have been cleared but not the Europa Search index as 
+      the Europa Search Services does not allow a full index clearing yet.<br />
+      Until this feature is available, please contact the EC Search support for resetting the index entries related to your site.');
+      drupal_set_message($message, 'warning');
+
+      return;
     }
 
     $indexDeleteSender = new IndexSender($this->ESClientFactory, $this->options['ingestion_settings']['fallback_language']);
