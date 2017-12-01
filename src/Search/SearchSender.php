@@ -16,7 +16,7 @@ class SearchSender {
   /**
    * The message to build and to send through the client.
    *
-   * @var EC\EuropaSearch\Messages\Search\SearchMessage
+   * @var \EC\EuropaSearch\Messages\Search\SearchMessage
    */
   protected $searchMessage;
 
