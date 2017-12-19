@@ -4,6 +4,15 @@
 
 Search API Europa Search module provides a backend for the Search API which uses the "Europa Search" search engine for storing and searching data.
 
+Table of content:
+=================
+- [Introduction](#introduction)
+- [Requirements](#requirements)
+- [Limitations](#limitations)
+- [Installation](#installation)
+  - [For module maintainers](#for-module-maintainers)
+  - [For site builders](#for-site-builders)
+
 ## Introduction
 
 Europa Search is the corporate search engine for the European Commission. 
@@ -20,7 +29,7 @@ To do so, it will rely on the [Europa Search Client Library](https://github.com/
 * Search API module;
 * [Europa Search Client Library](https://github.com/ec-europa/oe-europa-search-client);
 * An "class autoload" mechanism allowing Drupal to load classes coming from the composer _"vendor"_ repository.<br />
-  The test environment used in this project uses the contrib module "[Composer Autoload](https://www.drupal.org/project/composer_autoload)"
+* The test environment for this project uses the contrib module "[Composer Autoload](https://www.drupal.org/project/composer_autoload)"
   as mechanism.
 
 ## Limitation
@@ -32,48 +41,27 @@ Like the client library, The module is compatible with the **versions 2 and uppe
 
 ### For module maintainers
 
-The project proposes a script that installs automatically the development/test environment with an up and running Drupal instance.
-This instance allows testing the module's code in the same way that Travis will do.
+Run:
 
-In order to use this script, please read the next sub-sections.
+```
+$ composer install
+```
 
-#### Prerequisites
-* OS: Unix/Linux, OS X.<br /><br />
-  For Windows, the tasks listed in the 4th point of the ["Script execution"](#script-execution) sub-section, must
-  be executed manually.<br /><br />
-* Composer.
-* Web server with:
-  * PHP support; the project supports currently PHP 5.6+;
-  * An access to a database.
+This will download all development dependencies and build a Drupal 7 target site under `./build` and run
+`./vendor/bin/robo project:setup` to setup proper symlink and produce necessary scaffolding files.
 
-#### Script execution
+After that:
 
-1. Clone the "[github](https://github.com/ec-europa/search_api_europa_search)" repository in the "DocumentRoot" repository of 
-   your server (www or htdocs);
-2. Go in the cloned repository;
-3. Create a _"scripts/build.properties.local"_ file where you set parameters specific to your environment.<br />
-   The available parameters are listed in the _"scripts/build.properties.dist"_ file. You have just to define those that are 
-   specific to your environment.<br />
-   Below, the list of available parameters with their use:
-   * **USER_MAIL**: The e-mail of the admin user to define in the Drupal instance of your environment;
-   * **USER_NAME**: The user name of the admin user to define in the Drupal instance of your environment;
-   * **USER_PASSWORD**: The user password of the admin user to define in the Drupal instance of your environment;
-   * **DB_TYPE**: The database type used in your environment and will be used in the DB url definition (I.E. mysql);
-   * **DB_URL**: The database URL used in your environment and will be used in the DB url definition;
-   * **DB_PORT**: (Optional) The database URL used in your environment and will be used in the DB url definition;
-   * **DB_USER**: The database user name used in your environment and will be used in the DB url definition;
-   * **DB_PASS**: (Optional) The database user password used in your environment and will be used in the DB url definition;
-   * **DB_NAME**: The database name used in your environment and will be used in the DB url definition;
-4. Execute this command: `scripts/setup-dev-env.sh`.<br /><br />
-   This command will execute **automatically** the following tasks:
-   * Executing the `composer install` command based on the project's _"composer.json"_ file in order to:
-     - Installing the different libraries the project depends on;
-     - Enabling GrumPHP quality control on the Git commits (see the ["Quality control" section](#quality-control));
-     - Creating the _"web"_ sub-folder with the code of a Drupal 7 site and the "contrib" modules required by Search API 
-       Europa Search;   
-   * Creating symlinks for the module files and the sub-folders in the _"web/sites/all/modules"_ repository;
-   * Generating the Drupal 7 site based on the parameters set in the _"scripts/build.properties.local"_ file.<br /><br />
-5. The environment is up and running with a fresh Drupal instance where the module is enabled for the tests (see the ["Tests" section](#tests))
+1. Copy `robo.yml.dist` into `robo.yml` and customise relevant parameters.
+2. Run `./vendor/bin/robo project:install` to install the project having the Search API Europa Search module enabled.
+
+The project uses the target site for tests, see the ["Tests" section](#tests) for more information.
+
+To have a complete list of building options run:
+
+```
+$ ./vendor/bin/robo
+```
 
 #### Quality control
 
@@ -107,16 +95,117 @@ TODO (NEPT-934)
 
 ### For site builders
 
-```
-TODO (NEPT-935)
-```
+#### Requirements
+
+ * Drupal 7.x
+ * Search API 1.x
+ * Any solution allowing calling the composer autoload class like [Composer autoloader](https://www.drupal.org/project/composer_autoloader).
+ * Configuration parameters supplied by the Europa Search team.
+ 
+#### Installation
+ 
+Install as you would normally install a contributed Drupal module. See:
+https://drupal.org/documentation/install/modules-themes/modules-7 for further
+information.
+
+Navigate to administer >> modules. Enable "Search API Europa Search".
+
 
 ## Configuration
 
-```
-TODO (NEPT-935)
-```
+In order to use Europa Search service through Search API, you must define a server and at least an index via 
+the Search API administration interface.
 
+This README will only focus on Europa Search specificity. For general explanation about the Search API, 
+please consult the [Search API documentation](https://www.drupal.org/docs/7/modules/search-api)
 
+### Search API Server
+
+Configuring a server pointing the Europa Search services, implies the following configuration in the 
+"Add server" form of the Search API admin interface:
+ 
+ 1. **Service class**: Select the "_Europa Search Service_";
+ 2. **Ingestion services settings (Indexing requests) > Europa Search Service URL**: Type the URL where the ES Indexing services are hosted;
+ 3. **Ingestion services settings (Indexing requests) > Proxy settings for accessing the services**: Fields for configuring the proxy to use to connect 
+    the services<br />.
+    If the host system settings are enough, leave the child fields untouched; I.E.:
+    * _Configuration type_ : The type of configuration to use:
+      * "Host system's settings": The module will use the same proxy as the host system uses;
+      * "Specific proxy's settings": The module will use the proxy different than the host system uses;<br />
+        Then, the "Proxy URL" field must be filled.
+      * "Bypass proxy": The module will send requests without passing to any proxy;
+    * _Proxy URL_ : The URL of the specific proxy to use (mandatory if the "Configuration type" value is "Host system's settings");
+    * _Proxy user name_ : The user name to use for the Proxy credentials;
+    * _Proxy password_ : The password to use for the Proxy credentials;
+ 4. **Ingestion services settings (Indexing requests) > Registered API key**: The API key to use with the indexing requests.<br /> 
+    It is communicated by the Europa Search team;
+ 5. **Ingestion services settings (Indexing requests) > Fallback language in case of Neutral language content**: The code of the language 
+    to use instead of the 'und' (LANGUAGE_NONE) because ES services do not support this value;
+ 6. **Ingestion services settings (Indexing requests) > Registered database**: The database id to use with the indexing requests.<br /> 
+    It is communicated by the Europa Search team;
+    **Search API services settings (Search requests) > Europa Search Service URL**: Type the URL where the ES Search services are hosted;
+ 7. **Search API services settings (Search requests) > Proxy settings for accessing the services**: Fields for configuring the proxy to use to connect 
+    the services<br />.
+    If the host system settings are enough, leave the child fields untouched; I.E.:
+    * _Configuration type_ : The type of configuration to use:
+      * "Host system's settings": The module will use the same proxy as the host system uses;
+      * "Specific proxy's settings": The module will use the proxy different than the host system uses;<br />
+        Then, the "Proxy URL" field must be filled.
+      * "Bypass proxy": The module will send requests without passing to any proxy;
+    * _Proxy URL_ : The URL of the specific proxy to use (mandatory if the "Configuration type" value is "Host system's settings");
+    * _Proxy user name_ : The user name to use for the Proxy credentials;
+    * _Proxy password_ : The password to use for the Proxy credentials;
+ 8. **Search API services settings (Search requests) > Registered API key**: The API key to use with the search requests.<br /> 
+    It is communicated by the Europa Search team.<br />
+    Note that the value can be the same as the indexing one.
+ 9. **Search API services settings (Search requests) > Include the database value in search queries**: Indicates if the database id 
+    set previously must be used in the search queries sent to the services.
+
+ ### Search API index
+ 
+ The definition of the Search API index is detailed in the [Search API official documentation](https://www.drupal.org/docs/7/modules/search-api/getting-started/howto-add-an-index).
+ 
+ #### Mandatory configurations:
+ 
+ In order that the Search API interacts correctly with the Europa Search services, some data alterations **must** be add to the Search API index,
+ see filters tab of the index definition interface:
+ * URL field;
+ * Complete entity view; 
+ * Europa Search reference.
+ 
+ It adds data required by the Europa Search services in order to index correctly entities.
+ 
+ ### Recommended configurations:
+ 
+ It is recommended to enable "**Europa Search results processing**" processor in the index filters. This Search API processor allows:
+ - Setting the highlighting parameters to use with each search request:
+   - Which HTML tags to use in the text highlighting mechanism ("**Highlighting prefix**" & "**Highlighting suffix**" processor parameters);
+   - The maximum number of characters that must be highlighted in a result text ("**Highlight limit**" processor parameter).
+ - Setting which text format to apply on "text" fields (string, fulltext search, uri...) ("**Text format on result text fields**" processor parameter).
+ 
+ Without this processor, the Europa Search service will use their default parameters for highlighting texts, and the "check plain" format will be apply
+ on all text fields.
+ 
+ ### Multilingualism
+ 
+ The module does not manage the multilingualism itself because Search API do it natively for the "content translation" (i18n) mechanism.
+ 
+ For entities for which the "Entity translation" (ET) mechanism manages translations, the use of the **version 2.x of the "[Search API Entity Translation]**(https://www.drupal.org/project/search_api_et)" 
+ module is required.<br />
+ 
+ #### Entity translation support: Configuration
+ 
+ In order to support multilingual searches based on Entity translation, you need to:
+ * Enable Search API Entity Translation (see above);
+ * Create an Search API index through the Search API index creation form (path: admin/config/search/search_api/add_index) as usual but
+   by selecting one of these Item types to index:
+   - Multilingual Comment (indexing "ET" comments);
+   - Multilingual Node (indexing "ET" contents);
+   - Multilingual File (indexing "ET" files)
+   - Multilingual Taxonomy term (indexing "ET" Taxonomy terms);
+   - Multilingual Taxonomy vocabulary (indexing "ET" Taxonomy vocabularies);
+ * Continue the configuration with the specific configurations detailed the 2 previous sub-sections.
+ 
+In the current version, the module does not support "multiple" Multilingual types; I.E. an index covering several entity types.
 
 

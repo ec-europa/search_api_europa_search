@@ -4,3 +4,47 @@
  * @file
  * Provides an Europa Search-based service class for the Search API.
  */
+
+/**
+ * Implements hook_search_api_service_info().
+ *
+ * It declares the new Europa Search service for Search API.
+ */
+function search_api_europa_search_search_api_service_info() {
+  $services['europa_search_service'] = array(
+    'name' => t('Europa Search Service'),
+    'description' => t('Service for Europa search engine.'),
+    'class' => 'Drupal\search_api_europa_search\Service',
+  );
+
+  return $services;
+}
+
+/**
+ * Implements hook_search_api_alter_callback_info().
+ */
+function search_api_europa_search_search_api_alter_callback_info() {
+  $callbacks['search_api_europa_search_alter_add_reference'] = array(
+    'name' => t('Europa Search reference'),
+    'description' => t("Adds a specific reference (id) to the indexed data."),
+    'class' => 'Drupal\search_api_europa_search\EuropaSearchReferenceDataAlterator',
+  );
+
+  return $callbacks;
+}
+
+/**
+ * Implements hook_search_api_processor_info().
+ */
+function search_api_europa_search_search_api_processor_info() {
+  $processors['search_api_europa_search_processor'] = array(
+    'name' => t('Europa Search results processing'),
+    'description' => t('Configure the highlighting that Europa Search services must apply results,
+    and the text format to apply on the text fields returned with results.<br/> 
+    <strong>Do not use it with the "Highlighting" and "HTML filter" processors!</strong>'),
+    'class' => 'Drupal\search_api_europa_search\EuropaSearchProcessor',
+    'weight' => 40,
+  );
+
+  return $processors;
+}
