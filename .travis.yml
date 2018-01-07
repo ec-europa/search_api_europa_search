@@ -6,18 +6,16 @@ php:
 env:
   global:
     - PATH=$PATH:/home/travis/.composer/vendor/bin:$TRAVIS_BUILD_DIR/vendor/bin
-
-before_install:
-# Increase Memory Limit
-  - phpenv config-add travis.php.ini
+    - COMPOSER_MEMORY_LIMIT=2G
 
 install:
+  - echo "always_populate_raw_post_data=-1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - composer self-update
   - composer install
   - phantomjs --webdriver=4444 > /dev/null &
 
 before_script:
-  - robo project:install
+  - run drupal:site-install
   - drush --root=$PWD/build --debug runserver :8888 > ~/debug.txt 2>&1 &
   - sleep 4s
 
